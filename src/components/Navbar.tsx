@@ -143,7 +143,7 @@ export function Navbar() {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-4">
+            <nav className="hidden lg:flex items-center">
 
               {/* Services */}
               <button
@@ -281,7 +281,7 @@ export function Navbar() {
                 boxShadow: '0 20px 40px rgba(0,0,0,.12)',
               }}
             >
-              <div className="max-w-screen-xl mx-auto px-8 py-8">
+              <div className="max-w-7xl mx-auto px-8 py-8">
                 <div className="grid grid-cols-4 gap-3">
                   {services.map(({ icon: Icon, label, sub, href }) => (
                     <Link
