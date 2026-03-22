@@ -122,12 +122,13 @@ function SectionHeader({
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
 /* Icon map for services from DB */
-const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
+type IconComponent = React.ComponentType<{ size?: number; style?: React.CSSProperties; className?: string }>;
+const iconMap: Record<string, IconComponent> = {
   Layers, Square, Droplets, Flower2, Fence, DoorOpen, Home, TreePine,
 };
 
 /* Fallback services (shown while loading) */
-const fallbackServices = [
+const fallbackServices: { icon: IconComponent; label: string; desc: string; href: string; image: string }[] = [
   { icon: Layers, label: 'New Decks', desc: 'Custom designed and built decks tailored to your home and lifestyle.', href: '/services/new-decks-installation/', image: '' },
   { icon: Square, label: 'Deck Resurfacing', desc: 'Give your existing deck a fresh, modern look with premium materials.', href: '/services/deck-resurfacing/', image: '' },
   { icon: Droplets, label: 'Outdoor Washing', desc: 'Professional power washing for decks, siding & concrete surfaces.', href: '/services/outdoor-power-washing/', image: '' },
