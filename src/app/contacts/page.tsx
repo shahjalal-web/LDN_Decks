@@ -1,9 +1,10 @@
 'use client';
 
-import type { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
 import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const contactInfo = [
   { icon: Phone, label: 'Phone', value: '+1 (571) 655-7207', href: 'tel:+15716557207' },
@@ -12,17 +13,64 @@ const contactInfo = [
   { icon: Clock, label: 'Hours', value: 'Mon–Fri 8AM–6PM | Sat 9AM–2PM', href: null },
 ];
 
-const services = [
-  'New Decks', 'Deck Resurfacing', 'Outdoor Washing', 'Gazebo & Pergola',
-  'Fence', 'Entry Doors', 'Porches', 'Patios', 'Other',
-];
-
 export default function ContactPage() {
+  const [form, setForm] = useState({
+    firstName: '', lastName: '', email: '', phone: '',
+    address: '', city: '', state: 'VA', zipCode: '',
+    service: '', projectDetails: ''
+  });
+  const [callbackForm, setCallbackForm] = useState({ firstName: '', phone: '' });
+  const [loading, setLoading] = useState(false);
+  const [callbackLoading, setCallbackLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [callbackSubmitted, setCallbackSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  const [callbackError, setCallbackError] = useState('');
+  const [services, setServices] = useState<{ _id: string; title: string }[]>([]);
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    fetch(`${API}/services`)
+      .then(res => res.json())
+      .then(data => setServices(data))
+      .catch(() => setServices([]));
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${API}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, type: 'estimate' }),
+      });
+      if (!res.ok) throw new Error('Failed to submit. Please try again.');
+      setSubmitted(true);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleCallbackSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setCallbackLoading(true);
+    setCallbackError('');
+    try {
+      const res = await fetch(`${API}/contacts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ firstName: callbackForm.firstName, phone: callbackForm.phone, type: 'callback' }),
+      });
+      if (!res.ok) throw new Error('Failed to submit. Please try again.');
+      setCallbackSubmitted(true);
+    } catch (err: unknown) {
+      setCallbackError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setCallbackLoading(false);
+    }
   }
 
   return (
@@ -66,28 +114,44 @@ export default function ContactPage() {
               </div>
 
               {/* Quick Callback */}
-              <div
+              {/* <div
                 className="p-6 rounded-2xl border"
                 style={{ backgroundColor: 'var(--muted)', borderColor: 'var(--border)' }}
               >
                 <h3 className="font-bold mb-4" style={{ color: 'var(--foreground)' }}>Quick Callback Request</h3>
-                <div className="space-y-3">
-                  <input type="text" placeholder="Your Name" maxLength={20}
-                    className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2"
-                    style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-                  />
-                  <input type="tel" placeholder="Phone Number"
-                    className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2"
-                    style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
-                  />
-                  <button
-                    className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:scale-105"
-                    style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}
-                  >
-                    Call Me Back
-                  </button>
-                </div>
-              </div>
+                {callbackSubmitted ? (
+                  <div className="text-center py-4">
+                    <p className="font-bold" style={{ color: 'var(--accent)' }}>Thank you!</p>
+                    <p className="text-sm mt-1" style={{ color: 'var(--muted-foreground)' }}>We&apos;ll call you back shortly.</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleCallbackSubmit} className="space-y-3">
+                    <input type="text" placeholder="Your Name" maxLength={20} required
+                      value={callbackForm.firstName}
+                      onChange={(e) => setCallbackForm({ ...callbackForm, firstName: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2"
+                      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    />
+                    <input type="tel" placeholder="Phone Number" required
+                      value={callbackForm.phone}
+                      onChange={(e) => setCallbackForm({ ...callbackForm, phone: e.target.value })}
+                      className="w-full px-4 py-3 rounded-xl border text-sm outline-none focus:ring-2"
+                      style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={callbackLoading}
+                      className="w-full py-3 rounded-xl text-sm font-bold transition-all hover:scale-105"
+                      style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', opacity: callbackLoading ? 0.7 : 1 }}
+                    >
+                      {callbackLoading ? 'Sending...' : 'Call Me Back'}
+                    </button>
+                    {callbackError && (
+                      <p className="text-sm text-red-500 text-center">{callbackError}</p>
+                    )}
+                  </form>
+                )}
+              </div> */}
             </div>
 
             {/* Full Estimate Form */}
@@ -112,60 +176,84 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <input type="text" placeholder="First Name" required
+                      value={form.firstName}
+                      onChange={(e) => setForm({ ...form, firstName: e.target.value })}
                       className="px-4 py-3 rounded-xl border text-sm outline-none"
                       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     />
                     <input type="text" placeholder="Last Name" required
+                      value={form.lastName}
+                      onChange={(e) => setForm({ ...form, lastName: e.target.value })}
                       className="px-4 py-3 rounded-xl border text-sm outline-none"
                       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     />
                   </div>
                   <input type="email" placeholder="Email Address" required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                   />
                   <input type="tel" placeholder="Phone Number" required
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                   />
                   <input type="text" placeholder="Street Address"
+                    value={form.address}
+                    onChange={(e) => setForm({ ...form, address: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                   />
                   <div className="grid sm:grid-cols-3 gap-4">
                     <input type="text" placeholder="City"
+                      value={form.city}
+                      onChange={(e) => setForm({ ...form, city: e.target.value })}
                       className="px-4 py-3 rounded-xl border text-sm outline-none"
                       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     />
-                    <input type="text" placeholder="State" defaultValue="VA"
+                    <input type="text" placeholder="State"
+                      value={form.state}
+                      onChange={(e) => setForm({ ...form, state: e.target.value })}
                       className="px-4 py-3 rounded-xl border text-sm outline-none"
                       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     />
                     <input type="text" placeholder="Zip Code"
+                      value={form.zipCode}
+                      onChange={(e) => setForm({ ...form, zipCode: e.target.value })}
                       className="px-4 py-3 rounded-xl border text-sm outline-none"
                       style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                     />
                   </div>
                   <select
+                    value={form.service}
+                    onChange={(e) => setForm({ ...form, service: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border text-sm outline-none"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                   >
                     <option value="">Select a Service</option>
-                    {services.map((s) => <option key={s} value={s}>{s}</option>)}
+                    {services.map((s) => <option key={s._id} value={s.title}>{s.title}</option>)}
                   </select>
                   <textarea
                     placeholder="Project Details"
                     rows={4}
+                    value={form.projectDetails}
+                    onChange={(e) => setForm({ ...form, projectDetails: e.target.value })}
                     className="w-full px-4 py-3 rounded-xl border text-sm outline-none resize-none"
                     style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
                   />
                   <button
                     type="submit"
+                    disabled={loading}
                     className="w-full py-4 rounded-xl text-sm font-bold transition-all hover:scale-105 flex items-center justify-center gap-2"
-                    style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}
+                    style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', opacity: loading ? 0.7 : 1 }}
                   >
-                    <Send size={16} /> Submit Estimate Request
+                    <Send size={16} /> {loading ? 'Submitting...' : 'Submit Estimate Request'}
                   </button>
+                  {error && (
+                    <p className="text-sm text-red-500 text-center">{error}</p>
+                  )}
                 </form>
               )}
             </div>

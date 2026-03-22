@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
   ArrowRight, Phone, Star, Shield, Leaf, BadgeCheck,
@@ -120,16 +121,24 @@ function SectionHeader({
 }
 
 /* ─── Data ─────────────────────────────────────────────────────────────────── */
-const services = [
-  { icon: Layers, label: 'New Decks', desc: 'Custom designed and built decks tailored to your home and lifestyle.', href: '/services/new-decks-installation/' },
-  { icon: Square, label: 'Deck Resurfacing', desc: 'Give your existing deck a fresh, modern look with premium materials.', href: '/services/deck-resurfacing/' },
-  { icon: Droplets, label: 'Outdoor Washing', desc: 'Professional power washing for decks, siding & concrete surfaces.', href: '/services/outdoor-power-washing/' },
-  { icon: Flower2, label: 'Gazebo & Pergola', desc: 'Elegant shade structures built with premium materials for outdoor comfort.', href: '/services/gazebos-and-pergolas/' },
-  { icon: Fence, label: 'Fence', desc: 'Privacy, security, and style crafted for your outdoor space.', href: '/services/fences/' },
-  { icon: DoorOpen, label: 'Entry Doors', desc: 'Boost curb appeal with a beautiful new entry door installation.', href: '/services/entry-doors/' },
-  { icon: Home, label: 'Porches', desc: 'Front, open, and screened porch construction for year-round enjoyment.', href: '/services/porches/' },
-  { icon: TreePine, label: 'Patios', desc: 'Custom patio design for relaxation and outdoor entertaining.', href: '/services/patios/' },
+/* Icon map for services from DB */
+const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
+  Layers, Square, Droplets, Flower2, Fence, DoorOpen, Home, TreePine,
+};
+
+/* Fallback services (shown while loading) */
+const fallbackServices = [
+  { icon: Layers, label: 'New Decks', desc: 'Custom designed and built decks tailored to your home and lifestyle.', href: '/services/new-decks-installation/', image: '' },
+  { icon: Square, label: 'Deck Resurfacing', desc: 'Give your existing deck a fresh, modern look with premium materials.', href: '/services/deck-resurfacing/', image: '' },
+  { icon: Droplets, label: 'Outdoor Washing', desc: 'Professional power washing for decks, siding & concrete surfaces.', href: '/services/outdoor-power-washing/', image: '' },
+  { icon: Flower2, label: 'Gazebo & Pergola', desc: 'Elegant shade structures built with premium materials for outdoor comfort.', href: '/services/gazebos-and-pergolas/', image: '' },
+  { icon: Fence, label: 'Fence', desc: 'Privacy, security, and style crafted for your outdoor space.', href: '/services/fences/', image: '' },
+  { icon: DoorOpen, label: 'Entry Doors', desc: 'Boost curb appeal with a beautiful new entry door installation.', href: '/services/entry-doors/', image: '' },
+  { icon: Home, label: 'Porches', desc: 'Front, open, and screened porch construction for year-round enjoyment.', href: '/services/porches/', image: '' },
+  { icon: TreePine, label: 'Patios', desc: 'Custom patio design for relaxation and outdoor entertaining.', href: '/services/patios/', image: '' },
 ];
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const stats = [
   { label: 'Projects Completed', value: 500, suffix: '+' },
@@ -185,6 +194,26 @@ export default function HomePage() {
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
   const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  const [services, setServices] = useState(fallbackServices);
+
+  useEffect(() => {
+    fetch(`${API_URL}/services`)
+      .then(res => res.json())
+      .then((data: { title: string; slug: string; description: string; icon?: string; image?: string; isActive: boolean }[]) => {
+        const mapped = data
+          .filter(s => s.isActive)
+          .map(s => ({
+            icon: (s.icon && iconMap[s.icon]) || Layers,
+            label: s.title,
+            desc: s.description,
+            href: `/services/${s.slug}/`,
+            image: s.image || '',
+          }));
+        if (mapped.length > 0) setServices(mapped);
+      })
+      .catch(() => { /* keep fallback */ });
+  }, []);
 
   return (
     <div style={{ paddingTop: '80px' }}>
@@ -405,36 +434,42 @@ export default function HomePage() {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
-          {services.map(({ icon: Icon, label, desc, href }, i) => (
+          {services.map(({ icon: Icon, label, desc, href, image }, i) => (
             <FadeIn key={label} delay={i * 0.06}>
               <Link
                 href={href}
-                className="group relative block p-7 md:p-8 lg:p-9 rounded-3xl border transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full"
+                className="group relative block rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl h-full"
                 style={{
                   backgroundColor: 'var(--card)',
                   borderColor: 'var(--border)',
                 }}
               >
-                {/* Hover gradient overlay */}
-                <div
-                  className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: 'linear-gradient(135deg, color-mix(in srgb, var(--accent) 5%, transparent), transparent)',
-                  }}
-                />
+                {/* Image */}
+                <div className="relative h-48 overflow-hidden">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={label}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    />
+                  ) : (
+                    <div
+                      className="w-full h-full flex items-center justify-center"
+                      style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)' }}
+                    >
+                      <Icon size={48} style={{ color: 'var(--accent)' }} />
+                    </div>
+                  )}
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </div>
 
-                <div className="relative z-10">
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
-                    style={{
-                      backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
-                      color: 'var(--accent)',
-                    }}
-                  >
-                    <Icon size={24} />
-                  </div>
-                  <h3 className="text-base font-bold mb-2.5" style={{ color: 'var(--foreground)' }}>{label}</h3>
-                  <p className="text-sm leading-relaxed mb-5" style={{ color: 'var(--muted-foreground)' }}>{desc}</p>
+                {/* Content */}
+                <div className="p-5">
+                  <h3 className="text-base font-bold mb-2" style={{ color: 'var(--foreground)' }}>{label}</h3>
+                  <p className="text-sm leading-relaxed mb-4 line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>{desc}</p>
                   <span
                     className="inline-flex items-center gap-1.5 text-xs font-bold transition-all group-hover:gap-3"
                     style={{ color: 'var(--accent)' }}

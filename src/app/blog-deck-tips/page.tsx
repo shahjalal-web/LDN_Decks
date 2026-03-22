@@ -1,93 +1,161 @@
 import type { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
+import { AnimatedSection } from '@/components/AnimatedSection';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Clock, User } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Deck Tips Blog',
-  description: 'Expert deck building tips, material guides, and outdoor living advice from the team at Loudoun Decks in Northern Virginia.',
+  title: 'Blog - Deck Building Tips & Guides | LDN Decks',
+  description:
+    'Explore our blog for the latest deck building tips, material guides, maintenance advice, and outdoor living inspiration from the LDN Decks team.',
 };
 
-const posts = [
-  {
-    slug: '/composite-decks-essential-tips-for-choosing-the-perfect-builder/',
-    title: 'Composite Decks: Essential Tips for Choosing the Perfect Builder',
-    excerpt: 'Not all deck builders are created equal. Learn what to look for when hiring a contractor for your composite deck project — and what red flags to avoid.',
-    readTime: '5 min read',
-    category: 'Hiring Tips',
-    color: '#d97706',
-  },
-  {
-    slug: '/choosing-right-deck-material-wood-vs-composite/',
-    title: 'Choosing the Right Deck Material: Wood vs Composite',
-    excerpt: 'Wood and composite decking both have their pros and cons. This guide breaks down cost, maintenance, longevity, and aesthetics to help you decide.',
-    readTime: '7 min read',
-    category: 'Materials Guide',
-    color: '#059669',
-  },
-  {
-    slug: '/the-ultimate-deck-building-guide-avoid-these-common-mistakes/',
-    title: 'The Ultimate Deck Building Guide: Avoid These Common Mistakes',
-    excerpt: 'From improper footings to skipping permits — these are the most common deck building mistakes homeowners make and how to avoid them.',
-    readTime: '8 min read',
-    category: 'Planning Guide',
-    color: '#7c3aed',
-  },
-];
+interface Blog {
+  _id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  image: string;
+  author: string;
+  category: string;
+  tags: string[];
+  readTime: string;
+  relatedServices: { _id: string; title: string; slug: string; image: string }[];
+  isPublished: boolean;
+  createdAt: string;
+}
 
-export default function BlogPage() {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+async function getBlogs(): Promise<Blog[]> {
+  try {
+    const res = await fetch(`${API_URL}/blogs`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.filter((b: Blog) => b.isPublished);
+  } catch {
+    return [];
+  }
+}
+
+export default async function BlogListingPage() {
+  const blogs = await getBlogs();
+
   return (
     <div style={{ paddingTop: '80px' }}>
       <PageHero
-        badge="Expert Advice"
-        title="Deck Tips"
-        highlight=" & Guides"
-        description="Expert advice on deck building, material selection, maintenance, and outdoor living — written by the Loudoun Decks team."
+        badge="Blog"
+        title="Check Our"
+        highlight=" Deck Building Tips"
+        description="Explore our Blog to see the latest Deck building tips, material guides, maintenance advice, and outdoor living inspiration."
         cta={false}
       />
 
       <section className="py-20" style={{ backgroundColor: 'var(--background)' }}>
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-8">
-            {posts.map((post) => (
-              <Link
-                key={post.slug}
-                href={post.slug}
-                className="group flex flex-col sm:flex-row gap-6 p-8 rounded-2xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {blogs.length === 0 ? (
+            <AnimatedSection>
+              <div
+                className="text-center py-20 px-6 rounded-2xl border"
                 style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
               >
-                <div
-                  className="w-full sm:w-32 h-32 sm:h-auto rounded-xl flex items-center justify-center text-3xl font-bold text-white shrink-0"
-                  style={{ backgroundColor: post.color, minHeight: '120px' }}
+                <p
+                  className="text-lg font-semibold mb-2"
+                  style={{ color: 'var(--foreground)' }}
                 >
-                  {post.category[0]}
-                </div>
-                <div className="flex-1">
-                  <span
-                    className="text-xs font-bold uppercase tracking-wider px-2 py-1 rounded-full"
-                    style={{ backgroundColor: `${post.color}18`, color: post.color }}
+                  No blog posts yet
+                </p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                  Check back soon for deck building tips and guides.
+                </p>
+              </div>
+            </AnimatedSection>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {blogs.map((blog, index) => (
+                <AnimatedSection key={blog._id} delay={index * 0.1}>
+                  <Link
+                    href={`/blog-deck-tips/${blog.slug}/`}
+                    className="group block rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                    style={{
+                      backgroundColor: 'var(--card)',
+                      borderColor: 'var(--border)',
+                    }}
                   >
-                    {post.category}
-                  </span>
-                  <h2 className="text-xl font-bold mt-3 mb-3 group-hover:text-amber-500 transition-colors" style={{ color: 'var(--foreground)' }}>
-                    {post.title}
-                  </h2>
-                  <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--muted-foreground)' }}>
-                    {post.excerpt}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                      <span className="flex items-center gap-1"><User size={12} /> Nick Zugrav</span>
-                      <span className="flex items-center gap-1"><Clock size={12} /> {post.readTime}</span>
+                    {/* Image */}
+                    <div className="relative w-full" style={{ aspectRatio: '16 / 10' }}>
+                      <Image
+                        src={blog.image}
+                        alt={blog.title}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
                     </div>
-                    <span className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all" style={{ color: 'var(--accent)' }}>
-                      Read more <ArrowRight size={12} />
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+
+                    {/* Content */}
+                    <div className="p-6">
+                      {/* Category badge */}
+                      <span
+                        className="inline-block text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3"
+                        style={{
+                          backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                          color: 'var(--accent)',
+                        }}
+                      >
+                        {blog.category}
+                      </span>
+
+                      {/* Title */}
+                      <h2
+                        className="text-lg font-bold mb-2 leading-snug transition-colors duration-200"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        {blog.title}
+                      </h2>
+
+                      {/* Excerpt — clamped to 3 lines */}
+                      <p
+                        className="text-sm leading-relaxed mb-4"
+                        style={{
+                          color: 'var(--muted-foreground)',
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {blog.excerpt}
+                      </p>
+
+                      {/* Footer */}
+                      <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid var(--border)' }}>
+                        <div
+                          className="flex items-center gap-4 text-xs"
+                          style={{ color: 'var(--muted-foreground)' }}
+                        >
+                          <span className="flex items-center gap-1">
+                            <User size={12} /> {blog.author}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Clock size={12} /> {blog.readTime}
+                          </span>
+                        </div>
+                        <span
+                          className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all"
+                          style={{ color: 'var(--accent)' }}
+                        >
+                          Read <ArrowRight size={12} />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </AnimatedSection>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </div>

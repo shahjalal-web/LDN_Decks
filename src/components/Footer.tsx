@@ -160,6 +160,27 @@ export function Footer() {
               Privacy Policy
             </Link>
           </div>
+          <p>
+            Developed by{' '}
+            <a
+              href="https://www.fiverr.com/shah_jalal_web"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold hover:text-amber-500 transition-colors"
+              style={{ color: 'var(--accent)' }}
+            >
+              Shah Jalal
+            </a>
+            {' | '}
+            <a
+              href="https://wa.me/8801832822560"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-amber-500 transition-colors"
+            >
+              WhatsApp
+            </a>
+          </p>
         </div>
       </div>
     </footer>

@@ -7,45 +7,54 @@ import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sun, Moon, Menu, X, ChevronDown, Phone, ArrowRight,
-  Layers, Square, Droplets, Flower2, Fence, DoorOpen, Home, TreePine, MapPin
+  Layers, Square, Droplets, Flower2, Fence, DoorOpen, Home, TreePine, MapPin,
+  LayoutDashboard, LogOut, User
 } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
-const services = [
-  { icon: Layers,   label: 'New Decks',         sub: 'Custom design & build',       href: '/services/new-decks-installation/' },
-  { icon: Square,   label: 'Deck Resurfacing',   sub: 'Surface refresh & upgrade',   href: '/services/deck-resurfacing/' },
-  { icon: Droplets, label: 'Outdoor Washing',    sub: 'Deck, siding & concrete',     href: '/services/outdoor-power-washing/' },
-  { icon: Flower2,  label: 'Gazebo & Pergola',   sub: 'Shade structure builds',      href: '/services/gazebos-and-pergolas/' },
-  { icon: Fence,    label: 'Fence',              sub: 'Privacy & security fencing',  href: '/services/fences/' },
-  { icon: DoorOpen, label: 'Entry Doors',        sub: 'Install & replacement',       href: '/services/entry-doors/' },
-  { icon: Home,     label: 'Porches',            sub: 'Front, open & screened',      href: '/services/porches/' },
-  { icon: TreePine, label: 'Patios',             sub: 'Outdoor entertaining spaces', href: '/services/patios/' },
-];
+/* ── Icon map for dynamic services ─────────────────────────────────── */
+const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
+  Layers, Square, Droplets, Flower2, Fence, DoorOpen, Home, TreePine,
+};
 
-const counties = [
-  { name: 'Loudoun County',       cities: ['Ashburn', 'Leesburg', 'Sterling', 'Aldie', 'Purcellville', 'Brambleton', 'South Riding', 'Broadlands'] },
-  { name: 'Fairfax County',       cities: ['Fairfax', 'Reston', 'Herndon', 'McLean', 'Chantilly', 'Centreville', 'Alexandria', 'Great Falls'] },
-  { name: 'Prince William County',cities: ['Woodbridge', 'Haymarket', 'Gainesville', 'Dumfries', 'Lake Ridge', 'Montclair'] },
+const aboutLinks = [
+  { label: 'About Us', href: '/about-loudoun-deck-company/', sub: 'Learn about LDN Decks' },
+  { label: 'Why Choose Us', href: '/why-choose-us/', sub: 'What sets us apart' },
+  { label: 'Our Process', href: '/our-process/', sub: 'How we work' },
 ];
 
 const navLinks = [
-  { label: 'About',    href: '/about-loudoun-deck-company/' },
-  { label: 'Why Us',   href: '/why-choose-us/' },
-  { label: 'Process',  href: '/our-process/' },
   { label: 'Showcase', href: '/deck-projects-showcase/' },
   { label: 'Blog',     href: '/blog-deck-tips/' },
 ];
 
-function slugify(city: string) {
-  return city.toLowerCase().replace(/\s+/g, '-');
+/* ── Types for dynamic data ───────────────────────────────────────── */
+export interface NavService {
+  title: string;
+  slug: string;
+  description: string;
+  icon?: string;
 }
 
-export function Navbar() {
+export interface NavCounty {
+  name: string;
+  cities: { name: string; slug: string }[];
+}
+
+interface NavbarProps {
+  services?: NavService[];
+  counties?: NavCounty[];
+}
+
+export function Navbar({ services = [], counties = [] }: NavbarProps) {
   const { theme, setTheme } = useTheme();
+  const { user, dbUser, logout } = useAuth();
   const [mounted, setMounted]         = useState(false);
   const [mobileOpen, setMobileOpen]   = useState(false);
-  const [activeMenu, setActiveMenu]   = useState<'services' | 'near' | null>(null);
+  const [activeMenu, setActiveMenu]   = useState<'services' | 'near' | 'about' | null>(null);
   const [scrolled, setScrolled]       = useState(false);
   const navRef                        = useRef<HTMLElement>(null);
+  const isAdmin = dbUser?.role === 'admin';
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -72,7 +81,7 @@ export function Navbar() {
     return () => { document.body.style.overflow = ''; };
   }, [mobileOpen]);
 
-  const toggle = (menu: 'services' | 'near') =>
+  const toggle = (menu: 'services' | 'near' | 'about') =>
     setActiveMenu(activeMenu === menu ? null : menu);
 
   return (
@@ -185,6 +194,26 @@ export function Navbar() {
                 />
               </button>
 
+              {/* About */}
+              <button
+                onMouseEnter={() => setActiveMenu('about')}
+                onClick={() => toggle('about')}
+                className="flex items-center gap-1 px-3.5 py-2 rounded-lg text-[13px] font-semibold transition-colors"
+                style={{
+                  color: activeMenu === 'about' ? 'var(--accent)' : 'var(--foreground)',
+                  backgroundColor: activeMenu === 'about'
+                    ? 'color-mix(in srgb, var(--accent) 8%, transparent)'
+                    : 'transparent',
+                }}
+              >
+                About
+                <ChevronDown
+                  size={13}
+                  className="transition-transform duration-200"
+                  style={{ transform: activeMenu === 'about' ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                />
+              </button>
+
               {/* Separator */}
               <span className="mx-1 h-4 w-px" style={{ backgroundColor: 'var(--border)' }} />
 
@@ -199,6 +228,22 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Dashboard link for admin */}
+              {isAdmin && (
+                <>
+                  <span className="mx-1 h-4 w-px" style={{ backgroundColor: 'var(--border)' }} />
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setActiveMenu(null)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                    style={{ color: 'var(--accent)' }}
+                  >
+                    <LayoutDashboard size={14} />
+                    Dashboard
+                  </Link>
+                </>
+              )}
             </nav>
 
             {/* Right actions */}
@@ -230,6 +275,28 @@ export function Navbar() {
                     }
                   </motion.div>
                 </button>
+              )}
+
+              {/* Auth buttons */}
+              {user ? (
+                <button
+                  onClick={() => { logout(); setActiveMenu(null); }}
+                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                  style={{ color: 'var(--muted-foreground)' }}
+                >
+                  <LogOut size={14} />
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  href="/login"
+                  onClick={() => setActiveMenu(null)}
+                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                  style={{ color: 'var(--foreground)' }}
+                >
+                  <User size={14} />
+                  Login
+                </Link>
               )}
 
               {/* CTA */}
@@ -283,41 +350,44 @@ export function Navbar() {
             >
               <div className="max-w-7xl mx-auto px-8 py-8">
                 <div className="grid grid-cols-4 gap-3">
-                  {services.map(({ icon: Icon, label, sub, href }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setActiveMenu(null)}
-                      className="group flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                      style={{
-                        borderColor: 'var(--border)',
-                        backgroundColor: 'var(--background)',
-                      }}
-                    >
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors group-hover:scale-110 duration-200"
+                  {services.map((svc) => {
+                    const Icon = iconMap[svc.icon || ''] || Layers;
+                    return (
+                      <Link
+                        key={svc.slug}
+                        href={`/services/${svc.slug}/`}
+                        onClick={() => setActiveMenu(null)}
+                        className="group flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                         style={{
-                          backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-                          color: 'var(--accent)',
+                          borderColor: 'var(--border)',
+                          backgroundColor: 'var(--background)',
                         }}
                       >
-                        <Icon size={17} />
-                      </div>
-                      <div>
-                        <p className="text-[13px] font-bold leading-tight mb-0.5" style={{ color: 'var(--foreground)' }}>
-                          {label}
-                        </p>
-                        <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
-                          {sub}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
+                        <div
+                          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors group-hover:scale-110 duration-200"
+                          style={{
+                            backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                            color: 'var(--accent)',
+                          }}
+                        >
+                          <Icon size={17} />
+                        </div>
+                        <div>
+                          <p className="text-[13px] font-bold leading-tight mb-0.5" style={{ color: 'var(--foreground)' }}>
+                            {svc.title}
+                          </p>
+                          <p className="text-[11px] line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>
+                            {svc.description}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
 
                 <div className="mt-4 pt-4 border-t flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
                   <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                    Serving 36+ cities across Northern Virginia
+                    Serving {counties.reduce((acc, c) => acc + c.cities.length, 0)}+ cities across Northern Virginia
                   </p>
                   <Link
                     href="/services/"
@@ -349,7 +419,7 @@ export function Navbar() {
                 boxShadow: '0 20px 40px rgba(0,0,0,.12)',
               }}
             >
-              <div className="max-w-screen-xl mx-auto px-8 py-8">
+              <div className="max-w-7xl mx-auto px-8 py-8">
                 <div className="grid grid-cols-3 gap-10">
                   {counties.map((c) => (
                     <div key={c.name}>
@@ -362,13 +432,13 @@ export function Navbar() {
                       <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
                         {c.cities.map((city) => (
                           <Link
-                            key={city}
-                            href={`/top-decks-build-near-you/${slugify(city)}/`}
+                            key={city.slug}
+                            href={`/top-decks-build-near-you/${city.slug}/`}
                             onClick={() => setActiveMenu(null)}
                             className="text-[12px] font-medium transition-colors hover:text-amber-500"
                             style={{ color: 'var(--muted-foreground)' }}
                           >
-                            {city}
+                            {city.name}
                           </Link>
                         ))}
                       </div>
@@ -388,6 +458,51 @@ export function Navbar() {
                   >
                     View all locations <ArrowRight size={12} />
                   </Link>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── About dropdown ───────────────────────────────────────────────── */}
+        <AnimatePresence>
+          {activeMenu === 'about' && (
+            <motion.div
+              initial={{ opacity: 0, y: -6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              onMouseLeave={() => setActiveMenu(null)}
+              className="hidden lg:block absolute left-0 right-0 border-b"
+              style={{
+                backgroundColor: 'var(--card)',
+                borderColor: 'var(--border)',
+                boxShadow: '0 20px 40px rgba(0,0,0,.12)',
+              }}
+            >
+              <div className="max-w-7xl mx-auto px-8 py-6">
+                <div className="grid grid-cols-3 gap-3">
+                  {aboutLinks.map(({ label, href, sub }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setActiveMenu(null)}
+                      className="group flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                      style={{
+                        borderColor: 'var(--border)',
+                        backgroundColor: 'var(--background)',
+                      }}
+                    >
+                      <div>
+                        <p className="text-[13px] font-bold leading-tight mb-0.5" style={{ color: 'var(--foreground)' }}>
+                          {label}
+                        </p>
+                        <p className="text-[11px]" style={{ color: 'var(--muted-foreground)' }}>
+                          {sub}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </motion.div>
@@ -446,21 +561,44 @@ export function Navbar() {
                     Services
                   </p>
                   <div className="space-y-1">
-                    {services.map(({ icon: Icon, label, href }) => (
+                    {services.map((svc) => {
+                      const Icon = iconMap[svc.icon || ''] || Layers;
+                      return (
+                        <Link
+                          key={svc.slug}
+                          href={`/services/${svc.slug}/`}
+                          onClick={() => setMobileOpen(false)}
+                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <div
+                            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}
+                          >
+                            <Icon size={14} />
+                          </div>
+                          <span className="text-sm font-medium">{svc.title}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* About section */}
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-3 px-1" style={{ color: 'var(--accent)' }}>
+                    About
+                  </p>
+                  <div className="space-y-1">
+                    {aboutLinks.map((link) => (
                       <Link
-                        key={href}
-                        href={href}
+                        key={link.href}
+                        href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
+                        className="block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:text-amber-500"
                         style={{ color: 'var(--foreground)' }}
                       >
-                        <div
-                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                          style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}
-                        >
-                          <Icon size={14} />
-                        </div>
-                        <span className="text-sm font-medium">{label}</span>
+                        {link.label}
                       </Link>
                     ))}
                   </div>
@@ -473,9 +611,6 @@ export function Navbar() {
                   </p>
                   <div className="space-y-1">
                     {[
-                      { label: 'About Us', href: '/about-loudoun-deck-company/' },
-                      { label: 'Why Choose Us', href: '/why-choose-us/' },
-                      { label: 'Our Process', href: '/our-process/' },
                       { label: 'FAQ', href: '/faq-deck-building/' },
                       { label: 'Showcase', href: '/deck-projects-showcase/' },
                       { label: 'Blog', href: '/blog-deck-tips/' },
@@ -496,8 +631,61 @@ export function Navbar() {
                 </div>
               </div>
 
+              {/* Dashboard & Auth in mobile */}
+              {(isAdmin || user) && (
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest mb-3 px-1" style={{ color: 'var(--accent)' }}>
+                    Account
+                  </p>
+                  <div className="space-y-1">
+                    {isAdmin && (
+                      <Link
+                        href="/dashboard"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                        style={{ color: 'var(--accent)' }}
+                      >
+                        <div
+                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}
+                        >
+                          <LayoutDashboard size={14} />
+                        </div>
+                        Dashboard
+                      </Link>
+                    )}
+                    {user && (
+                      <button
+                        onClick={() => { logout(); setMobileOpen(false); }}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors w-full"
+                        style={{ color: 'var(--foreground)' }}
+                      >
+                        <div
+                          className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                          style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}
+                        >
+                          <LogOut size={14} />
+                        </div>
+                        Logout
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Drawer footer */}
               <div className="px-4 pb-6 pt-4 space-y-3 border-t shrink-0" style={{ borderColor: 'var(--border)' }}>
+                {!user && (
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileOpen(false)}
+                    className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold border-2 transition-colors"
+                    style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}
+                  >
+                    <User size={15} />
+                    Login
+                  </Link>
+                )}
                 <a
                   href="tel:+15716557207"
                   className="flex items-center justify-center gap-2 w-full py-3 rounded-xl text-sm font-semibold border-2 transition-colors"

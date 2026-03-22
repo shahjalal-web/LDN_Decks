@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from '@/components/ThemeProvider';
-import { Navbar } from '@/components/Navbar';
+import { AuthProvider } from '@/context/AuthContext';
+import { Navbar, type NavService, type NavCounty } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
@@ -14,14 +15,59 @@ export const metadata: Metadata = {
   keywords: ['deck builder', 'Northern Virginia', 'Loudoun County', 'custom decks', 'porch', 'patio'],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+async function getNavServices(): Promise<NavService[]> {
+  try {
+    const res = await fetch(`${API_URL}/services`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data as { title: string; slug: string; description: string; icon?: string }[]).map((s) => ({
+      title: s.title,
+      slug: s.slug,
+      description: s.description,
+      icon: s.icon,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+async function getNavCounties(): Promise<NavCounty[]> {
+  try {
+    const res = await fetch(`${API_URL}/cities`, { next: { revalidate: 60 } });
+    if (!res.ok) return [];
+    const cities = await res.json() as { name: string; slug: string; county: string; isActive: boolean }[];
+    const activeCities = cities.filter((c) => c.isActive);
+
+    // Group by county
+    const countyMap = new Map<string, { name: string; slug: string }[]>();
+    for (const city of activeCities) {
+      if (!countyMap.has(city.county)) countyMap.set(city.county, []);
+      countyMap.get(city.county)!.push({ name: city.name, slug: city.slug });
+    }
+
+    return Array.from(countyMap.entries()).map(([name, citiesList]) => ({
+      name,
+      cities: citiesList,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const [services, counties] = await Promise.all([getNavServices(), getNavCounties()]);
+
   return (
     <html lang="en" suppressHydrationWarning className="w-full">
       <body className="w-full min-h-screen flex flex-col">
         <ThemeProvider>
-          <Navbar />
-          <main className="w-full flex-1">{children}</main>
-          <Footer />
+          <AuthProvider>
+            <Navbar services={services} counties={counties} />
+            <main className="w-full flex-1">{children}</main>
+            <Footer />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
