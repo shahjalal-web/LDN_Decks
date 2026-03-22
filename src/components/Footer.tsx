@@ -160,7 +160,7 @@ export function Footer() {
               Privacy Policy
             </Link>
           </div>
-          <p>
+          {/* <p>
             Developed by{' '}
             <a
               href="https://www.fiverr.com/shah_jalal_web"
@@ -180,7 +180,7 @@ export function Footer() {
             >
               WhatsApp
             </a>
-          </p>
+          </p> */}
         </div>
       </div>
     </footer>
