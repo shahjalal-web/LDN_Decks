@@ -1,37 +1,107 @@
 import type { Metadata } from 'next';
 import { PageHero } from '@/components/PageHero';
-import { ArrowRight } from 'lucide-react';
+import { AnimatedSection } from '@/components/AnimatedSection';
+import { ArrowRight, CheckCircle2, MapPin } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Our Process',
-  description: 'Learn about Loudoun Decks\' simple 4-step process — from free consultation to project completion. Clear, transparent, and stress-free.',
+  description:
+    'Learn about Loudoun Decks\' simple 4-step process — from free consultation to project completion. Clear, transparent, and stress-free.',
 };
 
 const steps = [
   {
     number: '01',
     title: 'Free Consultation',
-    desc: 'We start with a no-obligation phone or video consultation. Tell us about your vision, ask questions, and let us help you explore possibilities. There\'s no pressure and no commitment required.',
-    items: ['Discuss your project ideas', 'Answer all your questions', 'Explore material options', 'Understand your budget'],
+    desc: 'Every project begins with a complimentary consultation. We discuss your ideas, answer questions, and review your outdoor space.',
+    items: [
+      'Discuss project ideas',
+      'Answer all questions',
+      'Explore material options',
+      'Understand budget',
+    ],
+    image: 'https://ldndecks.com/wp-content/uploads/2024/12/loudoun-deck-deck-builders.jpeg',
   },
   {
     number: '02',
     title: 'On-Site Visit & Planning',
-    desc: 'We come to your home for an on-site visit where we measure your space, assess your property, and explore layout options. This ensures our estimate is accurate and tailored to your exact situation.',
-    items: ['On-site measurements', 'Property assessment', 'Layout exploration', 'Design recommendations'],
+    desc: 'We schedule an on-site visit to review your space, take measurements, discuss layouts, and understand how the area will be used.',
+    items: [
+      'On-site measurements',
+      'Property assessment',
+      'Layout exploration',
+      'Design recommendations',
+    ],
+    image:
+      'https://ldndecks.com/wp-content/uploads/2024/10/father-with-toddler-son-building-wooden-frame-hous-2023-11-27-05-10-44-utc-1024x681.webp',
   },
   {
     number: '03',
     title: 'Project Review & Next Steps',
-    desc: 'Before any work begins, we walk you through the complete project scope, timeline, and costs. Everything is clearly defined in writing so you know exactly what to expect.',
-    items: ['Detailed written estimate', 'Clear project timeline', 'Material selection', 'Contract signing'],
+    desc: 'Details are outlined to clarify scope of work and help homeowners understand what to expect before construction.',
+    items: [
+      'Detailed written estimate',
+      'Clear project timeline',
+      'Material selection',
+      'Contract signing',
+    ],
+    image: null,
   },
   {
     number: '04',
-    title: 'Construction & Completion',
-    desc: 'Our skilled team builds your project with expert craftsmanship and ongoing communication. We handle all permits, keep your property clean, and do a final walkthrough together.',
-    items: ['Permit handling', 'Expert construction', 'Daily progress updates', 'Final walkthrough & warranty'],
+    title: 'Building the Outdoor Space',
+    desc: 'Construction begins with focus on organization and homeowner communication throughout the build.',
+    items: [
+      'Permit handling',
+      'Expert construction',
+      'Daily progress updates',
+      'Final walkthrough & warranty',
+    ],
+    image: null,
+  },
+];
+
+const serviceAreas = [
+  {
+    county: 'Loudoun County',
+    cities: [
+      'Ashburn',
+      'Leesburg',
+      'Sterling',
+      'South Riding',
+      'Brambleton',
+      'Aldie',
+      'Purcellville',
+      'Lovettsville',
+    ],
+  },
+  {
+    county: 'Fairfax County',
+    cities: [
+      'Centreville',
+      'Chantilly',
+      'Fairfax',
+      'Reston',
+      'Herndon',
+      'Vienna',
+      'Great Falls',
+      'McLean',
+      'Burke',
+      'Springfield',
+    ],
+  },
+  {
+    county: 'Prince William County',
+    cities: [
+      'Gainesville',
+      'Haymarket',
+      'Bristow',
+      'Manassas',
+      'Woodbridge',
+      'Lake Ridge',
+    ],
   },
 ];
 
@@ -42,62 +112,206 @@ export default function OurProcessPage() {
         badge="How It Works"
         title="Our Simple"
         highlight=" 4-Step Process"
-        description="From first conversation to finished outdoor space — we've designed a process that keeps you informed, in control, and confident every step of the way."
+        description="At Loudoun Decks, we follow a clear and structured process to help homeowners in Northern Virginia plan and build outdoor living projects with confidence."
       />
 
-      <section className="py-24" style={{ backgroundColor: 'var(--background)' }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-          {steps.map((step, i) => (
-            <div
-              key={step.number}
-              className={`flex flex-col ${i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} gap-10 items-start`}
+      {/* Intro Text */}
+      <section className="py-20" style={{ backgroundColor: 'var(--background)' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <AnimatedSection>
+            <p
+              className="text-lg sm:text-xl leading-relaxed"
+              style={{ color: 'var(--muted-foreground)' }}
             >
-              <div className="shrink-0">
-                <div
-                  className="w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-bold"
-                  style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}
-                >
-                  {step.number}
-                </div>
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>
-                  {step.title}
-                </h2>
-                <p className="text-base leading-relaxed mb-6" style={{ color: 'var(--muted-foreground)' }}>
-                  {step.desc}
-                </p>
-                <ul className="grid sm:grid-cols-2 gap-2">
-                  {step.items.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-sm" style={{ color: 'var(--foreground)' }}>
-                      <span style={{ color: 'var(--accent)' }}>✓</span> {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
+              Starting an outdoor living project can feel overwhelming without a clear plan.
+              Loudoun Decks uses a straightforward process designed to help homeowners understand
+              each step before construction begins.
+            </p>
+          </AnimatedSection>
         </div>
       </section>
 
-      <section
-        className="py-16"
-        style={{ backgroundColor: 'var(--accent)' }}
-      >
+      {/* Steps */}
+      <section className="py-8 pb-24" style={{ backgroundColor: 'var(--background)' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-24">
+          {steps.map((step, i) => {
+            const isEven = i % 2 === 0;
+            const hasImage = !!step.image;
+
+            return (
+              <AnimatedSection key={step.number} delay={i * 0.1}>
+                <div
+                  className={`flex flex-col ${
+                    hasImage
+                      ? isEven
+                        ? 'lg:flex-row'
+                        : 'lg:flex-row-reverse'
+                      : ''
+                  } gap-12 items-center`}
+                >
+                  {/* Image side */}
+                  {hasImage && (
+                    <div className="w-full lg:w-1/2">
+                      <div
+                        className="relative rounded-2xl overflow-hidden border"
+                        style={{
+                          borderColor: 'var(--border)',
+                          aspectRatio: '4 / 3',
+                        }}
+                      >
+                        <Image
+                          src={step.image!}
+                          alt={step.title}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 1024px) 100vw, 50vw"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Content side */}
+                  <div className={hasImage ? 'w-full lg:w-1/2' : 'w-full max-w-3xl mx-auto'}>
+                    {/* Step number badge */}
+                    <div className="flex items-center gap-4 mb-6">
+                      <div
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-bold shrink-0"
+                        style={{
+                          backgroundColor: 'var(--accent)',
+                          color: 'var(--accent-foreground)',
+                        }}
+                      >
+                        {step.number}
+                      </div>
+                      <div>
+                        <p
+                          className="text-xs font-bold uppercase tracking-widest mb-1"
+                          style={{ color: 'var(--accent)' }}
+                        >
+                          Step {step.number}
+                        </p>
+                        <h2
+                          className="text-2xl sm:text-3xl font-bold leading-tight"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          {step.title}
+                        </h2>
+                      </div>
+                    </div>
+
+                    <p
+                      className="text-base leading-relaxed mb-6"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      {step.desc}
+                    </p>
+
+                    <ul className="grid sm:grid-cols-2 gap-3">
+                      {step.items.map((item) => (
+                        <li
+                          key={item}
+                          className="flex items-center gap-3 text-sm"
+                          style={{ color: 'var(--foreground)' }}
+                        >
+                          <CheckCircle2
+                            size={18}
+                            className="shrink-0"
+                            style={{ color: 'var(--accent)' }}
+                          />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </AnimatedSection>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Service Area */}
+      <section className="py-20" style={{ backgroundColor: 'var(--muted)' }}>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimatedSection>
+            <div className="text-center mb-12">
+              <p
+                className="text-xs font-bold uppercase tracking-widest mb-3"
+                style={{ color: 'var(--accent)' }}
+              >
+                Where We Work
+              </p>
+              <h2
+                className="text-3xl sm:text-4xl font-bold mb-4"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Serving Northern Virginia
+              </h2>
+              <p
+                className="text-base leading-relaxed max-w-2xl mx-auto"
+                style={{ color: 'var(--muted-foreground)' }}
+              >
+                We proudly serve homeowners across Loudoun, Fairfax, and Prince William counties
+                and surrounding areas.
+              </p>
+            </div>
+          </AnimatedSection>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {serviceAreas.map((area, i) => (
+              <AnimatedSection key={area.county} delay={i * 0.1}>
+                <div
+                  className="p-6 rounded-2xl border h-full"
+                  style={{
+                    backgroundColor: 'var(--card)',
+                    borderColor: 'var(--border)',
+                  }}
+                >
+                  <div className="flex items-center gap-2 mb-4">
+                    <MapPin size={18} style={{ color: 'var(--accent)' }} />
+                    <h3
+                      className="text-lg font-bold"
+                      style={{ color: 'var(--foreground)' }}
+                    >
+                      {area.county}
+                    </h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {area.cities.map((city) => (
+                      <li
+                        key={city}
+                        className="text-sm"
+                        style={{ color: 'var(--muted-foreground)' }}
+                      >
+                        {city}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </AnimatedSection>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16" style={{ backgroundColor: 'var(--accent)' }}>
         <div className="max-w-3xl mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
-            Ready to Start Your Project?
-          </h2>
-          <p className="text-white/80 mb-8">
-            The first step is completely free and takes less than 30 minutes.
-          </p>
-          <Link
-            href="/contacts/"
-            className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold bg-white transition-all hover:scale-105"
-            style={{ color: 'var(--accent)' }}
-          >
-            Schedule Free Consultation <ArrowRight size={16} />
-          </Link>
+          <AnimatedSection>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">
+              Ready to Start Your Project?
+            </h2>
+            <p className="text-white/80 mb-8 text-lg">
+              The first step is completely free and takes less than 30 minutes.
+            </p>
+            <Link
+              href="/contacts/"
+              className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-sm font-bold bg-white transition-all duration-200 hover:scale-105"
+              style={{ color: 'var(--accent)' }}
+            >
+              Schedule Free Consultation <ArrowRight size={16} />
+            </Link>
+          </AnimatedSection>
         </div>
       </section>
     </div>

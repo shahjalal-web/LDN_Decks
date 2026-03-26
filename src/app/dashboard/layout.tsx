@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/static-components */
 'use client';
 
 import { useState } from 'react';
@@ -16,6 +17,7 @@ import {
   LogOut,
   Menu,
   X,
+  FileQuestion,
   ChevronRight,
 } from 'lucide-react';
 
@@ -25,6 +27,7 @@ const navItems = [
   { label: 'Blog', href: '/dashboard/blog', icon: FileText },
   { label: 'Showcase', href: '/dashboard/showcase', icon: Camera },
   { label: 'Cities', href: '/dashboard/cities', icon: MapPin },
+  { label: 'FAQ', href: '/dashboard/faq', icon: FileQuestion},
   { label: 'Contacts', href: '/dashboard/contacts', icon: MessageSquare },
 ];
 
@@ -216,7 +219,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 lg:ml-64">
-        <div className="p-4 sm:p-6 lg:p-8 pt-[140px] lg:pt-8">
+        <div className="p-4 sm:p-6 lg:p-8 pt-35 lg:pt-8">
           {children}
         </div>
       </main>

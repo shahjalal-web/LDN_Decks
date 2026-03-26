@@ -44,6 +44,7 @@ interface Service {
   icon: string;
   isActive: boolean;
   order: number;
+  parentService: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -60,6 +61,7 @@ interface ServiceForm {
   features: string[];
   isActive: boolean;
   order: number;
+  parentService: string | null;
 }
 
 const emptyForm: ServiceForm = {
@@ -74,6 +76,7 @@ const emptyForm: ServiceForm = {
   features: [''],
   isActive: true,
   order: 0,
+  parentService: null,
 };
 
 function slugify(text: string): string {
@@ -107,7 +110,10 @@ export default function ServicesPage() {
 
   const fetchServices = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/services`);
+      const token = await getToken();
+      const res = await fetch(`${API_URL}/services/flat`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       setServices(Array.isArray(data) ? data : []);
     } catch {
@@ -115,7 +121,7 @@ export default function ServicesPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     fetchServices();
@@ -337,6 +343,7 @@ export default function ServicesPage() {
       features: service.features && service.features.length > 0 ? service.features : [''],
       isActive: service.isActive,
       order: service.order,
+      parentService: service.parentService || null,
     });
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
@@ -589,6 +596,27 @@ export default function ServicesPage() {
                 </span>
               </label>
             </div>
+          </div>
+
+          {/* ── Parent Service ── */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
+              Parent Service <span className="text-xs font-normal" style={{ color: 'var(--muted-foreground)' }}>(leave empty for top-level service)</span>
+            </label>
+            <select
+              value={form.parentService || ''}
+              onChange={(e) => setForm((p) => ({ ...p, parentService: e.target.value || null }))}
+              className="w-full px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
+              style={inputStyle}
+            >
+              <option value="">None (Top-level service)</option>
+              {services
+                .filter((s) => !s.parentService && s._id !== editingId)
+                .map((s) => (
+                  <option key={s._id} value={s._id}>{s.title}</option>
+                ))
+              }
+            </select>
           </div>
 
           {/* ── Content Sections ── */}
@@ -1097,11 +1125,24 @@ export default function ServicesPage() {
                           )}
                         </td>
                         <td className="px-4 py-3">
-                          <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                            {service.title}
-                          </p>
+                          <div className="flex items-center gap-1.5">
+                            {service.parentService && (
+                              <span
+                                className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                                style={{ background: 'color-mix(in srgb, var(--accent) 12%, transparent)', color: 'var(--accent)' }}
+                              >
+                                Sub
+                              </span>
+                            )}
+                            <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                              {service.title}
+                            </p>
+                          </div>
                           <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                            /{service.slug}
+                            {service.parentService
+                              ? `↳ ${services.find((s) => s._id === service.parentService)?.title || 'Parent'} / ${service.slug}`
+                              : `/${service.slug}`
+                            }
                           </p>
                         </td>
                         <td className="px-4 py-3">

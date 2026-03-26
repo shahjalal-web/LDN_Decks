@@ -179,7 +179,30 @@ const testimonials = [
   },
 ];
 
-const partners = ['Trex', 'Fiberon', 'TimberTech', 'Veka', 'Versatex', 'Nexan'];
+// const partners = ['Trex', 'Fiberon', 'TimberTech', 'Veka', 'Versatex', 'Nexan'];
+
+const platformBadges = [
+  {
+    name: 'Thumbtack Top Pro',
+    image: 'https://ldndecks.com/wp-content/uploads/2025/12/top-pro-2018-1024x635.webp',
+    href: 'https://www.thumbtack.com/va/centreville/deck-building/loudoun-decks/service/525498870907756552',
+  },
+  {
+    name: 'Brownbook',
+    image: 'https://ldndecks.com/wp-content/uploads/2025/12/logo192.png',
+    href: 'https://www.brownbook.net/business/53345178/loudoun-decks-llc/',
+  },
+  {
+    name: 'Hotfrog',
+    image: 'https://ldndecks.com/wp-content/uploads/2025/12/images.png',
+    href: 'https://www.hotfrog.com/company/b2e3b89b4e7f4b2fce74e7c84c2b27a7/loudoun-decks-llc/centreville/deck-builders',
+  },
+  {
+    name: 'BBB Accredited Business',
+    image: 'https://ldndecks.com/wp-content/uploads/2025/12/images-1.png',
+    href: 'https://www.bbb.org/us/va/centreville/profile/deck-builder/loudoun-decks-llc-0241-236027095',
+  },
+];
 
 const processSteps = [
   { step: '01', title: 'Free Consultation', desc: 'Discuss your ideas and vision. We answer all your questions with no obligation.', icon: Phone },
@@ -464,7 +487,7 @@ export default function HomePage() {
                     </div>
                   )}
                   {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </div>
 
                 {/* Content */}
@@ -678,21 +701,32 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
           <FadeIn>
             <p
-              className="text-center text-xs font-bold uppercase tracking-[0.2em] mb-10"
+              className="text-center text-xs font-bold uppercase tracking-[0.2em] mb-3"
               style={{ color: 'var(--muted-foreground)' }}
             >
               Trusted Partners & Premium Materials
             </p>
           </FadeIn>
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 items-center">
-            {partners.map((p, i) => (
-              <FadeIn key={p} delay={i * 0.08}>
-                <div
-                  className="text-xl md:text-2xl font-extrabold tracking-wide transition-all duration-300 hover:scale-110"
-                  style={{ color: 'var(--muted-foreground)', opacity: 0.5 }}
+          
+
+          <div className="flex flex-wrap justify-center gap-8 md:gap-14 items-center">
+            {platformBadges.map((badge, i) => (
+              <FadeIn key={badge.name} delay={i * 0.1}>
+                <a
+                  href={badge.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block transition-all duration-300 hover:scale-110 hover:opacity-100 opacity-80"
+                  title={badge.name}
                 >
-                  {p}
-                </div>
+                  <Image
+                    src={badge.image}
+                    alt={badge.name}
+                    width={120}
+                    height={60}
+                    className="object-contain h-12 md:h-16 w-auto"
+                  />
+                </a>
               </FadeIn>
             ))}
           </div>

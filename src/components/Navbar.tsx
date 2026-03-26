@@ -3,10 +3,11 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Sun, Moon, Menu, X, ChevronDown, Phone, ArrowRight,
+  Sun, Moon, Menu, X, ChevronDown, ChevronRight, Phone, ArrowRight,
   Layers, Square, Droplets, Flower2, Fence, DoorOpen, Home, TreePine, MapPin,
   LayoutDashboard, LogOut, User
 } from 'lucide-react';
@@ -18,9 +19,11 @@ const iconMap: Record<string, React.ComponentType<{ size?: number }>> = {
 };
 
 const aboutLinks = [
-  { label: 'About Us', href: '/about-loudoun-deck-company/', sub: 'Learn about LDN Decks' },
+  { label: 'About Company', href: '/about-loudoun-deck-company/', sub: 'Learn about LDN Decks' },
+  { label: 'Our Contacts', href: '/contacts/', sub: 'Get in touch with us' },
   { label: 'Why Choose Us', href: '/why-choose-us/', sub: 'What sets us apart' },
   { label: 'Our Process', href: '/our-process/', sub: 'How we work' },
+  { label: 'FAQ', href: '/faq-deck-building/', sub: 'Common questions answered' },
 ];
 
 const navLinks = [
@@ -34,6 +37,7 @@ export interface NavService {
   slug: string;
   description: string;
   icon?: string;
+  children?: NavService[];
 }
 
 export interface NavCounty {
@@ -53,6 +57,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
   const [mobileOpen, setMobileOpen]   = useState(false);
   const [activeMenu, setActiveMenu]   = useState<'services' | 'near' | 'about' | null>(null);
   const [scrolled, setScrolled]       = useState(false);
+  const [hoveredService, setHoveredService] = useState<string | null>(null);
   const navRef                        = useRef<HTMLElement>(null);
   const isAdmin = dbUser?.role === 'admin';
 
@@ -125,21 +130,17 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-1 select-none"
+              className="flex items-center select-none"
               onClick={() => setActiveMenu(null)}
             >
-              <span
-                className="text-2xl font-black tracking-tight"
-                style={{ color: 'var(--accent)' }}
-              >
-                LDN
-              </span>
-              <span
-                className="text-2xl font-black tracking-tight"
-                style={{ color: 'var(--foreground)' }}
-              >
-                Decks
-              </span>
+              <Image
+                src="/ldndecks-logo.webp"
+                alt="LDN Decks"
+                width={140}
+                height={40}
+                className="h-9 w-auto"
+                priority
+              />
               <span
                 className="ml-2 hidden sm:inline text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
                 style={{
@@ -340,7 +341,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: 0.18, ease: 'easeOut' }}
-              onMouseLeave={() => setActiveMenu(null)}
+              onMouseLeave={() => { setActiveMenu(null); setHoveredService(null); }}
               className="hidden lg:block absolute left-0 right-0 border-b"
               style={{
                 backgroundColor: 'var(--card)',
@@ -352,35 +353,88 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                 <div className="grid grid-cols-4 gap-3">
                   {services.map((svc) => {
                     const Icon = iconMap[svc.icon || ''] || Layers;
+                    const hasChildren = svc.children && svc.children.length > 0;
                     return (
-                      <Link
+                      <div
                         key={svc.slug}
-                        href={`/services/${svc.slug}/`}
-                        onClick={() => setActiveMenu(null)}
-                        className="group flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-                        style={{
-                          borderColor: 'var(--border)',
-                          backgroundColor: 'var(--background)',
-                        }}
+                        className="relative"
+                        onMouseEnter={() => hasChildren ? setHoveredService(svc.slug) : setHoveredService(null)}
+                        onMouseLeave={() => setHoveredService(null)}
                       >
-                        <div
-                          className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors group-hover:scale-110 duration-200"
+                        <Link
+                          href={`/services/${svc.slug}/`}
+                          onClick={() => { setActiveMenu(null); setHoveredService(null); }}
+                          className="group flex items-start gap-3 p-4 rounded-xl border transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
                           style={{
-                            backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-                            color: 'var(--accent)',
+                            borderColor: hoveredService === svc.slug ? 'var(--accent)' : 'var(--border)',
+                            backgroundColor: 'var(--background)',
                           }}
                         >
-                          <Icon size={17} />
-                        </div>
-                        <div>
-                          <p className="text-[13px] font-bold leading-tight mb-0.5" style={{ color: 'var(--foreground)' }}>
-                            {svc.title}
-                          </p>
-                          <p className="text-[11px] line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>
-                            {svc.description}
-                          </p>
-                        </div>
-                      </Link>
+                          <div
+                            className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 transition-colors group-hover:scale-110 duration-200"
+                            style={{
+                              backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+                              color: 'var(--accent)',
+                            }}
+                          >
+                            <Icon size={17} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <p className="text-[13px] font-bold leading-tight mb-0.5" style={{ color: 'var(--foreground)' }}>
+                                {svc.title}
+                              </p>
+                              {hasChildren && (
+                                <ChevronRight size={12} style={{ color: 'var(--muted-foreground)' }} className="shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-[11px] line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>
+                              {svc.description}
+                            </p>
+                          </div>
+                        </Link>
+
+                        {/* Sub-service flyout */}
+                        {hasChildren && hoveredService === svc.slug && (
+                          <div
+                            className="absolute left-full top-0 ml-2 w-60 rounded-xl border p-2 z-50"
+                            style={{
+                              backgroundColor: 'var(--card)',
+                              borderColor: 'var(--border)',
+                              boxShadow: '0 12px 32px rgba(0,0,0,.12)',
+                            }}
+                          >
+                            <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--accent)' }}>
+                              {svc.title}
+                            </p>
+                            {svc.children!.map((child) => (
+                              <Link
+                                key={child.slug}
+                                href={`/services/${svc.slug}/${child.slug}/`}
+                                onClick={() => { setActiveMenu(null); setHoveredService(null); }}
+                                className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all duration-200"
+                                style={{ color: 'var(--foreground)' }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'var(--accent)';
+                                  e.currentTarget.style.color = 'var(--accent-foreground)';
+                                  e.currentTarget.style.transform = 'translateX(4px)';
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent';
+                                  e.currentTarget.style.color = 'var(--foreground)';
+                                  e.currentTarget.style.transform = 'translateX(0)';
+                                }}
+                              >
+                                <span
+                                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                                  style={{ backgroundColor: 'var(--accent)' }}
+                                />
+                                {child.title}
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>
@@ -539,9 +593,14 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                 className="flex items-center justify-between px-5 py-4 border-b shrink-0"
                 style={{ borderColor: 'var(--border)' }}
               >
-                <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-1">
-                  <span className="text-xl font-black" style={{ color: 'var(--accent)' }}>LDN</span>
-                  <span className="text-xl font-black" style={{ color: 'var(--foreground)' }}>Decks</span>
+                <Link href="/" onClick={() => setMobileOpen(false)} className="flex items-center">
+                  <Image
+                    src="/ldndecks-logo.webp"
+                    alt="LDN Decks"
+                    width={120}
+                    height={34}
+                    className="h-8 w-auto"
+                  />
                 </Link>
                 <button
                   onClick={() => setMobileOpen(false)}
@@ -563,22 +622,39 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                   <div className="space-y-1">
                     {services.map((svc) => {
                       const Icon = iconMap[svc.icon || ''] || Layers;
+                      const hasChildren = svc.children && svc.children.length > 0;
                       return (
-                        <Link
-                          key={svc.slug}
-                          href={`/services/${svc.slug}/`}
-                          onClick={() => setMobileOpen(false)}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
-                          style={{ color: 'var(--foreground)' }}
-                        >
-                          <div
-                            className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}
+                        <div key={svc.slug}>
+                          <Link
+                            href={`/services/${svc.slug}/`}
+                            onClick={() => setMobileOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors"
+                            style={{ color: 'var(--foreground)' }}
                           >
-                            <Icon size={14} />
-                          </div>
-                          <span className="text-sm font-medium">{svc.title}</span>
-                        </Link>
+                            <div
+                              className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0"
+                              style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)', color: 'var(--accent)' }}
+                            >
+                              <Icon size={14} />
+                            </div>
+                            <span className="text-sm font-medium">{svc.title}</span>
+                          </Link>
+                          {hasChildren && (
+                            <div className="ml-10 space-y-0.5 mt-0.5">
+                              {svc.children!.map((child) => (
+                                <Link
+                                  key={child.slug}
+                                  href={`/services/${svc.slug}/${child.slug}/`}
+                                  onClick={() => setMobileOpen(false)}
+                                  className="block px-3 py-2 rounded-lg text-[13px] transition-colors"
+                                  style={{ color: 'var(--muted-foreground)' }}
+                                >
+                                  {child.title}
+                                </Link>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>

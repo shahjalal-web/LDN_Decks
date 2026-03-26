@@ -22,11 +22,17 @@ async function getNavServices(): Promise<NavService[]> {
     const res = await fetch(`${API_URL}/services`, { next: { revalidate: 60 } });
     if (!res.ok) return [];
     const data = await res.json();
-    return (data as { title: string; slug: string; description: string; icon?: string }[]).map((s) => ({
+    return (data as { title: string; slug: string; description: string; icon?: string; children?: { title: string; slug: string; description: string; icon?: string }[] }[]).map((s) => ({
       title: s.title,
       slug: s.slug,
       description: s.description,
       icon: s.icon,
+      children: s.children?.map((c) => ({
+        title: c.title,
+        slug: c.slug,
+        description: c.description,
+        icon: c.icon,
+      })),
     }));
   } catch {
     return [];

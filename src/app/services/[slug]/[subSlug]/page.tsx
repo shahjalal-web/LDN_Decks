@@ -70,27 +70,39 @@ async function getRelatedBlogs(serviceId: string): Promise<RelatedBlog[]> {
   }
 }
 
-async function getServiceBySlug(slug: string): Promise<Service | null> {
+async function getChildService(parentSlug: string, childSlug: string): Promise<{ parent: Service; child: Service } | null> {
   const services = await getServices();
-  return services.find((s: Service) => s.slug === slug) || null;
+  const parent = services.find((s: Service) => s.slug === parentSlug);
+  if (!parent || !parent.children) return null;
+  const child = parent.children.find((c: Service) => c.slug === childSlug);
+  if (!child) return null;
+  return { parent, child };
 }
 
 export async function generateStaticParams() {
   const services = await getServices();
-  return services.map((s: Service) => ({ slug: s.slug }));
+  const params: { slug: string; subSlug: string }[] = [];
+  for (const service of services) {
+    if (service.children) {
+      for (const child of service.children) {
+        params.push({ slug: service.slug, subSlug: child.slug });
+      }
+    }
+  }
+  return params;
 }
 
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; subSlug: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
-  const service = await getServiceBySlug(slug);
-  if (!service) return { title: 'Service Not Found' };
+  const { slug, subSlug } = await params;
+  const result = await getChildService(slug, subSlug);
+  if (!result) return { title: 'Service Not Found' };
   return {
-    title: service.title,
-    description: service.description,
+    title: `${result.child.title} | ${result.parent.title}`,
+    description: result.child.description,
   };
 }
 
@@ -98,47 +110,37 @@ function renderDescription(text: string) {
   return text.split('\n').map((line, i) => {
     if (line.startsWith('\u2022')) {
       return (
-        <li
-          key={i}
-          className="ml-4 text-sm"
-          style={{ color: 'var(--muted-foreground)' }}
-        >
+        <li key={i} className="ml-4 text-sm" style={{ color: 'var(--muted-foreground)' }}>
           {line.slice(1).trim()}
         </li>
       );
     }
     if (/^\d+\./.test(line)) {
       return (
-        <li
-          key={i}
-          className="ml-4 text-sm font-medium"
-          style={{ color: 'var(--foreground)' }}
-        >
+        <li key={i} className="ml-4 text-sm font-medium" style={{ color: 'var(--foreground)' }}>
           {line}
         </li>
       );
     }
     if (!line.trim()) return <br key={i} />;
     return (
-      <p
-        key={i}
-        className="text-sm leading-relaxed mb-2"
-        style={{ color: 'var(--muted-foreground)' }}
-      >
+      <p key={i} className="text-sm leading-relaxed mb-2" style={{ color: 'var(--muted-foreground)' }}>
         {line}
       </p>
     );
   });
 }
 
-export default async function ServiceDetailPage({
+export default async function SubServicePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; subSlug: string }>;
 }) {
-  const { slug } = await params;
-  const service = await getServiceBySlug(slug);
-  if (!service) notFound();
+  const { slug, subSlug } = await params;
+  const result = await getChildService(slug, subSlug);
+  if (!result) notFound();
+
+  const { parent, child: service } = result;
   const relatedBlogs = await getRelatedBlogs(service._id);
 
   return (
@@ -160,29 +162,23 @@ export default async function ServiceDetailPage({
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-1.5 text-xs mb-8">
-            <Link
-              href="/"
-              className="transition-colors hover:underline"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+          <nav className="flex items-center gap-1.5 text-xs mb-8 flex-wrap">
+            <Link href="/" className="transition-colors hover:underline" style={{ color: 'var(--muted-foreground)' }}>
               Home
             </Link>
-            <ChevronRight
-              size={12}
-              style={{ color: 'var(--muted-foreground)' }}
-            />
+            <ChevronRight size={12} style={{ color: 'var(--muted-foreground)' }} />
+            <Link href="/services/" className="transition-colors hover:underline" style={{ color: 'var(--muted-foreground)' }}>
+              Services
+            </Link>
+            <ChevronRight size={12} style={{ color: 'var(--muted-foreground)' }} />
             <Link
-              href="/services/"
+              href={`/services/${parent.slug}/`}
               className="transition-colors hover:underline"
               style={{ color: 'var(--muted-foreground)' }}
             >
-              Services
+              {parent.title}
             </Link>
-            <ChevronRight
-              size={12}
-              style={{ color: 'var(--muted-foreground)' }}
-            />
+            <ChevronRight size={12} style={{ color: 'var(--muted-foreground)' }} />
             <span style={{ color: 'var(--accent)' }} className="font-semibold">
               {service.title}
             </span>
@@ -195,10 +191,7 @@ export default async function ServiceDetailPage({
             >
               {service.title}
             </h1>
-            <p
-              className="text-lg leading-relaxed"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
+            <p className="text-lg leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>
               {service.description}
             </p>
           </div>
@@ -221,10 +214,7 @@ export default async function ServiceDetailPage({
                       color: 'var(--foreground)',
                     }}
                   >
-                    <CheckCircle
-                      size={14}
-                      style={{ color: 'var(--accent)' }}
-                    />
+                    <CheckCircle size={14} style={{ color: 'var(--accent)' }} />
                     {feature}
                   </span>
                 ))}
@@ -234,47 +224,29 @@ export default async function ServiceDetailPage({
         </section>
       )}
 
-      {/* Content Sections — alternating layout */}
+      {/* Content Sections */}
       {service.sections && service.sections.length > 0 && (
-        <section
-          className="py-20"
-          style={{ backgroundColor: 'var(--background)' }}
-        >
+        <section className="py-20" style={{ backgroundColor: 'var(--background)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
             {service.sections.map((section, index) => {
               const isEven = index % 2 === 1;
               const hasImage = !!section.image;
-
               return (
                 <AnimatedSection key={index} delay={index * 0.1}>
                   <div
-                    className={`flex flex-col ${
-                      hasImage ? 'lg:flex-row' : ''
-                    } gap-10 items-center ${
+                    className={`flex flex-col ${hasImage ? 'lg:flex-row' : ''} gap-10 items-center ${
                       isEven && hasImage ? 'lg:flex-row-reverse' : ''
                     }`}
                   >
-                    {/* Image */}
                     {hasImage && (
                       <div className="w-full lg:w-[40%] shrink-0">
                         <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden">
-                          <Image
-                            src={section.image}
-                            alt={section.title}
-                            fill
-                            sizes="(max-width: 1024px) 100vw, 40vw"
-                            className="object-cover"
-                          />
+                          <Image src={section.image} alt={section.title} fill sizes="(max-width: 1024px) 100vw, 40vw" className="object-cover" />
                         </div>
                       </div>
                     )}
-
-                    {/* Text */}
                     <div className={hasImage ? 'flex-1' : 'w-full max-w-3xl mx-auto'}>
-                      <h2
-                        className="text-2xl sm:text-3xl font-bold mb-4"
-                        style={{ color: 'var(--foreground)' }}
-                      >
+                      <h2 className="text-2xl sm:text-3xl font-bold mb-4" style={{ color: 'var(--foreground)' }}>
                         {section.title}
                       </h2>
                       <div>{renderDescription(section.description)}</div>
@@ -292,10 +264,7 @@ export default async function ServiceDetailPage({
         <section className="py-20" style={{ backgroundColor: 'var(--muted)' }}>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
-              <h2
-                className="text-3xl font-bold mb-12 text-center"
-                style={{ color: 'var(--foreground)' }}
-              >
+              <h2 className="text-3xl font-bold mb-12 text-center" style={{ color: 'var(--foreground)' }}>
                 Our Process
               </h2>
             </AnimatedSection>
@@ -305,19 +274,11 @@ export default async function ServiceDetailPage({
                   <div className="text-center">
                     <div
                       className="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold mx-auto mb-3"
-                      style={{
-                        backgroundColor: 'var(--accent)',
-                        color: 'var(--accent-foreground)',
-                      }}
+                      style={{ backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' }}
                     >
                       {String(i + 1).padStart(2, '0')}
                     </div>
-                    <p
-                      className="text-sm font-medium"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      {step}
-                    </p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{step}</p>
                   </div>
                 </AnimatedSection>
               ))}
@@ -328,41 +289,19 @@ export default async function ServiceDetailPage({
 
       {/* FAQs */}
       {service.faqs && service.faqs.length > 0 && (
-        <section
-          className="py-20"
-          style={{ backgroundColor: 'var(--background)' }}
-        >
+        <section className="py-20" style={{ backgroundColor: 'var(--background)' }}>
           <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
-              <h2
-                className="text-3xl font-bold mb-10 text-center"
-                style={{ color: 'var(--foreground)' }}
-              >
+              <h2 className="text-3xl font-bold mb-10 text-center" style={{ color: 'var(--foreground)' }}>
                 Frequently Asked Questions
               </h2>
             </AnimatedSection>
             <div className="space-y-4">
               {service.faqs.map((faq, i) => (
                 <AnimatedSection key={i} delay={i * 0.05}>
-                  <div
-                    className="p-6 rounded-xl border"
-                    style={{
-                      backgroundColor: 'var(--card)',
-                      borderColor: 'var(--border)',
-                    }}
-                  >
-                    <h3
-                      className="font-semibold mb-2 text-sm"
-                      style={{ color: 'var(--foreground)' }}
-                    >
-                      {faq.question}
-                    </h3>
-                    <p
-                      className="text-sm leading-relaxed"
-                      style={{ color: 'var(--muted-foreground)' }}
-                    >
-                      {faq.answer}
-                    </p>
+                  <div className="p-6 rounded-xl border" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+                    <h3 className="font-semibold mb-2 text-sm" style={{ color: 'var(--foreground)' }}>{faq.question}</h3>
+                    <p className="text-sm leading-relaxed" style={{ color: 'var(--muted-foreground)' }}>{faq.answer}</p>
                   </div>
                 </AnimatedSection>
               ))}
@@ -371,69 +310,7 @@ export default async function ServiceDetailPage({
         </section>
       )}
 
-      {/* Child Services */}
-      {service.children && service.children.length > 0 && (
-        <section className="py-20" style={{ backgroundColor: 'var(--background)' }}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <AnimatedSection>
-              <div className="text-center mb-12">
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: 'var(--accent)' }}>
-                  Explore Our Options
-                </p>
-                <h2 className="text-3xl font-bold" style={{ color: 'var(--foreground)' }}>
-                  {service.title} Services
-                </h2>
-              </div>
-            </AnimatedSection>
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {service.children.map((child, i) => (
-                <AnimatedSection key={child._id} delay={i * 0.1}>
-                  <Link
-                    href={`/services/${service.slug}/${child.slug}/`}
-                    className="group block rounded-2xl overflow-hidden border transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                    style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-                  >
-                    {child.image ? (
-                      <div className="relative w-full aspect-16/10 overflow-hidden">
-                        <Image
-                          src={child.image}
-                          alt={child.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                      </div>
-                    ) : (
-                      <div
-                        className="w-full aspect-16/10 flex items-center justify-center"
-                        style={{ backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)' }}
-                      >
-                        <ArrowRight size={32} style={{ color: 'var(--accent)' }} />
-                      </div>
-                    )}
-                    <div className="p-5">
-                      <h3 className="font-bold mb-2 leading-snug" style={{ color: 'var(--foreground)' }}>
-                        {child.title}
-                      </h3>
-                      <p className="text-sm line-clamp-3 mb-3" style={{ color: 'var(--muted-foreground)' }}>
-                        {child.description}
-                      </p>
-                      <span
-                        className="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all"
-                        style={{ color: 'var(--accent)' }}
-                      >
-                        Learn more <ArrowRight size={12} />
-                      </span>
-                    </div>
-                  </Link>
-                </AnimatedSection>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Related Blog Posts */}
+      {/* Related Blogs */}
       {relatedBlogs.length > 0 && (
         <section className="py-20" style={{ backgroundColor: 'var(--muted)' }}>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -457,22 +334,12 @@ export default async function ServiceDetailPage({
                   >
                     {blog.image && (
                       <div className="relative w-full aspect-16/10 overflow-hidden">
-                        <Image
-                          src={blog.image}
-                          alt={blog.title}
-                          fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
+                        <Image src={blog.image} alt={blog.title} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
                       </div>
                     )}
                     <div className="p-5">
-                      <h3 className="font-bold mb-2 leading-snug" style={{ color: 'var(--foreground)' }}>
-                        {blog.title}
-                      </h3>
-                      <p className="text-sm line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>
-                        {blog.excerpt}
-                      </p>
+                      <h3 className="font-bold mb-2 leading-snug" style={{ color: 'var(--foreground)' }}>{blog.title}</h3>
+                      <p className="text-sm line-clamp-2" style={{ color: 'var(--muted-foreground)' }}>{blog.excerpt}</p>
                     </div>
                   </Link>
                 </AnimatedSection>
@@ -486,8 +353,7 @@ export default async function ServiceDetailPage({
       <section
         className="py-16"
         style={{
-          background:
-            'linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #000) 100%)',
+          background: 'linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #000) 100%)',
         }}
       >
         <div className="max-w-3xl mx-auto px-4 text-center">

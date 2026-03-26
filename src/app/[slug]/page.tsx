@@ -329,7 +329,7 @@ export default async function BlogDetailPage({
               {relatedBlogs.map((relBlog, index) => (
                 <AnimatedSection key={relBlog._id} delay={index * 0.1}>
                   <Link
-                    href={`/blog-deck-tips/${relBlog.slug}/`}
+                    href={`/${relBlog.slug}/`}
                     className="group block rounded-2xl border overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                     style={{
                       backgroundColor: 'var(--card)',

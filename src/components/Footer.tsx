@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Phone, Mail, MapPin, Clock, Facebook, Instagram, Twitter } from 'lucide-react';
 
 const footerLinks = {
@@ -34,9 +35,14 @@ export function Footer() {
 
           {/* Brand */}
           <div>
-            <Link href="/" className="text-2xl font-bold mb-4 inline-block">
-              <span style={{ color: 'var(--accent)' }}>LDN</span>
-              <span style={{ color: 'var(--foreground)' }}> Decks</span>
+            <Link href="/" className="inline-block mb-4">
+              <Image
+                src="/ldndecks-logo.webp"
+                alt="LDN Decks"
+                width={150}
+                height={42}
+                className="h-10 w-auto"
+              />
             </Link>
             <p className="text-sm leading-relaxed mb-6" style={{ color: 'var(--muted-foreground)' }}>
               Licensed outdoor living contractor serving Northern Virginia. Your Vision, Our Expertise, Perfect Outdoor Spaces.

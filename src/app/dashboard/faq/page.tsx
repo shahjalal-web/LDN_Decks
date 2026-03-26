@@ -10,67 +10,60 @@ import {
   Check,
   AlertCircle,
   Loader2,
-  MapPin,
+  HelpCircle,
   Search,
   X,
 } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-const COUNTY_OPTIONS = [
-  'Loudoun County',
-  'Fairfax County',
-  'Prince William County',
+const CATEGORY_OPTIONS = [
+  'About Loudoun Decks',
+  'Deck & Outdoor Living Services',
+  'Our Process',
+  'Project Planning Questions',
+  'Service Area Questions',
+  'Estimates & Contact',
 ];
 
-interface City {
+interface FAQ {
   _id: string;
-  name: string;
-  slug: string;
-  county: string;
+  question: string;
+  answer: string;
+  category: string;
   isActive: boolean;
   order: number;
   createdAt: string;
   updatedAt: string;
 }
 
-interface CityForm {
-  name: string;
-  slug: string;
-  county: string;
+interface FAQForm {
+  question: string;
+  answer: string;
+  category: string;
   isActive: boolean;
   order: number;
 }
 
-const emptyForm: CityForm = {
-  name: '',
-  slug: '',
-  county: '',
+const emptyForm: FAQForm = {
+  question: '',
+  answer: '',
+  category: '',
   isActive: true,
   order: 0,
 };
 
-function slugify(text: string): string {
-  const base = text
-    .toLowerCase()
-    .trim()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/[\s_]+/g, '-')
-    .replace(/-+/g, '-');
-  return base ? `deck-builder-in-${base}` : '';
-}
-
-export default function CitiesPage() {
+export default function FAQPage() {
   const { user } = useAuth();
-  const [cities, setCities] = useState<City[]>([]);
+  const [faqs, setFaqs] = useState<FAQ[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<CityForm>({ ...emptyForm });
+  const [form, setForm] = useState<FAQForm>({ ...emptyForm });
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [showCustomCounty, setShowCustomCounty] = useState(false);
+  const [showCustomCategory, setShowCustomCategory] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
 
   const getToken = useCallback(async () => {
@@ -78,21 +71,24 @@ export default function CitiesPage() {
     return await user.getIdToken();
   }, [user]);
 
-  const fetchCities = useCallback(async () => {
+  const fetchFaqs = useCallback(async () => {
     try {
-      const res = await fetch(`${API_URL}/cities`);
+      const token = await user?.getIdToken();
+      const res = await fetch(`${API_URL}/faqs/admin`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       const data = await res.json();
-      setCities(Array.isArray(data) ? data : []);
+      setFaqs(Array.isArray(data) ? data : []);
     } catch {
-      setCities([]);
+      setFaqs([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
-    fetchCities();
-  }, [fetchCities]);
+    fetchFaqs();
+  }, [fetchFaqs]);
 
   useEffect(() => {
     if (message) {
@@ -101,35 +97,30 @@ export default function CitiesPage() {
     }
   }, [message]);
 
-  /* ── Name / Slug ── */
-  const handleNameChange = (value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      name: value,
-      slug: editingId ? prev.slug : slugify(value),
-    }));
-  };
-
-  /* ── County selection ── */
-  const handleCountySelect = (value: string) => {
+  /* -- Category selection -- */
+  const handleCategorySelect = (value: string) => {
     if (value === '__custom__') {
-      setShowCustomCounty(true);
-      setForm((prev) => ({ ...prev, county: '' }));
+      setShowCustomCategory(true);
+      setForm((prev) => ({ ...prev, category: '' }));
     } else {
-      setShowCustomCounty(false);
-      setForm((prev) => ({ ...prev, county: value }));
+      setShowCustomCategory(false);
+      setForm((prev) => ({ ...prev, category: value }));
     }
   };
 
-  /* ── Submit ── */
+  /* -- Submit -- */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.slug.trim()) {
-      setMessage({ type: 'error', text: 'Name and slug are required.' });
+    if (!form.question.trim()) {
+      setMessage({ type: 'error', text: 'Question is required.' });
       return;
     }
-    if (!form.county.trim()) {
-      setMessage({ type: 'error', text: 'County is required.' });
+    if (!form.answer.trim()) {
+      setMessage({ type: 'error', text: 'Answer is required.' });
+      return;
+    }
+    if (!form.category.trim()) {
+      setMessage({ type: 'error', text: 'Category is required.' });
       return;
     }
 
@@ -137,8 +128,8 @@ export default function CitiesPage() {
     try {
       const token = await getToken();
       const url = editingId
-        ? `${API_URL}/cities/${editingId}`
-        : `${API_URL}/cities`;
+        ? `${API_URL}/faqs/${editingId}`
+        : `${API_URL}/faqs`;
       const method = editingId ? 'PATCH' : 'POST';
 
       const res = await fetch(url, {
@@ -152,17 +143,17 @@ export default function CitiesPage() {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Failed to save city.');
+        throw new Error(err.message || 'Failed to save FAQ.');
       }
 
       setMessage({
         type: 'success',
-        text: editingId ? 'City updated successfully.' : 'City created successfully.',
+        text: editingId ? 'FAQ updated successfully.' : 'FAQ created successfully.',
       });
       setForm({ ...emptyForm });
       setEditingId(null);
-      setShowCustomCounty(false);
-      await fetchCities();
+      setShowCustomCategory(false);
+      await fetchFaqs();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Something went wrong.';
       setMessage({ type: 'error', text: errorMessage });
@@ -171,70 +162,71 @@ export default function CitiesPage() {
     }
   };
 
-  /* ── Edit ── */
-  const handleEdit = (city: City) => {
-    setEditingId(city._id);
-    const isPreset = COUNTY_OPTIONS.includes(city.county);
-    setShowCustomCounty(!isPreset);
+  /* -- Edit -- */
+  const handleEdit = (faq: FAQ) => {
+    setEditingId(faq._id);
+    const isPreset = CATEGORY_OPTIONS.includes(faq.category);
+    setShowCustomCategory(!isPreset);
     setForm({
-      name: city.name,
-      slug: city.slug,
-      county: city.county,
-      isActive: city.isActive,
-      order: city.order,
+      question: faq.question,
+      answer: faq.answer,
+      category: faq.category,
+      isActive: faq.isActive,
+      order: faq.order,
     });
     formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
-  /* ── Delete ── */
+  /* -- Delete -- */
   const handleDelete = async (id: string) => {
     try {
       const token = await getToken();
-      const res = await fetch(`${API_URL}/cities/${id}`, {
+      const res = await fetch(`${API_URL}/faqs/${id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error('Failed to delete city.');
-      setMessage({ type: 'success', text: 'City deleted successfully.' });
+      if (!res.ok) throw new Error('Failed to delete FAQ.');
+      setMessage({ type: 'success', text: 'FAQ deleted successfully.' });
       setDeleteConfirm(null);
       if (editingId === id) {
         setEditingId(null);
         setForm({ ...emptyForm });
-        setShowCustomCounty(false);
+        setShowCustomCategory(false);
       }
-      await fetchCities();
+      await fetchFaqs();
     } catch {
-      setMessage({ type: 'error', text: 'Failed to delete city.' });
+      setMessage({ type: 'error', text: 'Failed to delete FAQ.' });
     }
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setForm({ ...emptyForm });
-    setShowCustomCounty(false);
+    setShowCustomCategory(false);
   };
 
-  /* ── Filter & group ── */
-  const filteredCities = cities.filter((city) => {
+  /* -- Filter & group -- */
+  const filteredFaqs = faqs.filter((faq) => {
     const q = searchQuery.toLowerCase();
     return (
-      city.name.toLowerCase().includes(q) ||
-      city.county.toLowerCase().includes(q)
+      faq.question.toLowerCase().includes(q) ||
+      faq.answer.toLowerCase().includes(q) ||
+      faq.category.toLowerCase().includes(q)
     );
   });
 
-  const groupedCities = filteredCities
+  const groupedFaqs = filteredFaqs
     .sort((a, b) => {
-      if (a.county !== b.county) return a.county.localeCompare(b.county);
+      if (a.category !== b.category) return a.category.localeCompare(b.category);
       return a.order - b.order;
     })
-    .reduce<Record<string, City[]>>((acc, city) => {
-      if (!acc[city.county]) acc[city.county] = [];
-      acc[city.county].push(city);
+    .reduce<Record<string, FAQ[]>>((acc, faq) => {
+      if (!acc[faq.category]) acc[faq.category] = [];
+      acc[faq.category].push(faq);
       return acc;
     }, {});
 
-  /* ── Shared input styles ── */
+  /* -- Shared input styles -- */
   const inputStyle: React.CSSProperties = {
     background: 'var(--background)',
     color: 'var(--foreground)',
@@ -252,11 +244,11 @@ export default function CitiesPage() {
   };
 
   const inputFocusHandlers = {
-    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       e.currentTarget.style.borderColor = 'var(--accent)';
       e.currentTarget.style.boxShadow = '0 0 0 2px rgba(217,119,6,0.15)';
     },
-    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => {
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
       e.currentTarget.style.borderColor = 'var(--border)';
       e.currentTarget.style.boxShadow = 'none';
     },
@@ -270,10 +262,10 @@ export default function CitiesPage() {
         className="mb-6"
       >
         <h1 className="text-2xl sm:text-3xl font-bold mb-1" style={{ color: 'var(--foreground)' }}>
-          City Management
+          FAQ Management
         </h1>
         <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
-          Create, edit, and manage your service areas.
+          Create, edit, and manage your frequently asked questions.
         </p>
       </motion.div>
 
@@ -297,7 +289,7 @@ export default function CitiesPage() {
         )}
       </AnimatePresence>
 
-      {/* ────────────── Form Section ────────────── */}
+      {/* Form Section */}
       <motion.div
         ref={formRef}
         initial={{ opacity: 0, y: 20 }}
@@ -314,56 +306,56 @@ export default function CitiesPage() {
           className="text-lg font-semibold mb-5"
           style={{ color: 'var(--foreground)' }}
         >
-          {editingId ? 'Edit City' : 'Add New City'}
+          {editingId ? 'Edit FAQ' : 'Add New FAQ'}
         </h2>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-          {/* Name & Slug Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
-                Name *
-              </label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                placeholder="e.g. Ashburn"
-                className="w-full px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
-                style={inputStyle}
-                {...inputFocusHandlers}
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
-                Slug *
-              </label>
-              <input
-                type="text"
-                value={form.slug}
-                onChange={(e) => setForm((p) => ({ ...p, slug: e.target.value }))}
-                placeholder="deck-builder-in-ashburn"
-                className="w-full px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
-                style={inputStyle}
-                {...inputFocusHandlers}
-                required
-              />
-            </div>
-          </div>
-
-          {/* County */}
+          {/* Question */}
           <div>
             <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
-              County *
+              Question *
             </label>
-            {showCustomCounty ? (
+            <input
+              type="text"
+              value={form.question}
+              onChange={(e) => setForm((p) => ({ ...p, question: e.target.value }))}
+              placeholder="e.g. What areas do you serve?"
+              className="w-full px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
+              style={inputStyle}
+              {...inputFocusHandlers}
+              required
+            />
+          </div>
+
+          {/* Answer */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
+              Answer *
+            </label>
+            <textarea
+              value={form.answer}
+              onChange={(e) => setForm((p) => ({ ...p, answer: e.target.value }))}
+              placeholder="Enter the answer to this question..."
+              rows={4}
+              className="w-full px-3 py-2.5 rounded-lg text-sm transition-all duration-200 resize-y"
+              style={inputStyle}
+              {...inputFocusHandlers}
+              required
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium mb-1.5" style={{ color: 'var(--foreground)' }}>
+              Category *
+            </label>
+            {showCustomCategory ? (
               <div className="flex items-center gap-2">
                 <input
                   type="text"
-                  value={form.county}
-                  onChange={(e) => setForm((p) => ({ ...p, county: e.target.value }))}
-                  placeholder="Enter custom county name"
+                  value={form.category}
+                  onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
+                  placeholder="Enter custom category name"
                   className="flex-1 px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
                   style={inputStyle}
                   {...inputFocusHandlers}
@@ -372,8 +364,8 @@ export default function CitiesPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowCustomCounty(false);
-                    setForm((p) => ({ ...p, county: '' }));
+                    setShowCustomCategory(false);
+                    setForm((p) => ({ ...p, category: '' }));
                   }}
                   className="p-2.5 rounded-lg cursor-pointer transition-colors duration-200"
                   style={{ color: 'var(--muted-foreground)', background: 'var(--muted)' }}
@@ -390,8 +382,8 @@ export default function CitiesPage() {
               </div>
             ) : (
               <select
-                value={COUNTY_OPTIONS.includes(form.county) ? form.county : '__custom__'}
-                onChange={(e) => handleCountySelect(e.target.value)}
+                value={CATEGORY_OPTIONS.includes(form.category) ? form.category : '__custom__'}
+                onChange={(e) => handleCategorySelect(e.target.value)}
                 className="w-full px-3 py-2.5 rounded-lg text-sm transition-all duration-200 cursor-pointer"
                 style={selectStyle}
                 onFocus={(e) => {
@@ -404,10 +396,10 @@ export default function CitiesPage() {
                 }}
                 required
               >
-                <option value="">Select a county...</option>
-                {COUNTY_OPTIONS.map((county) => (
-                  <option key={county} value={county}>
-                    {county}
+                <option value="">Select a category...</option>
+                {CATEGORY_OPTIONS.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
                   </option>
                 ))}
                 <option value="__custom__">Other (custom)...</option>
@@ -455,7 +447,7 @@ export default function CitiesPage() {
             </div>
           </div>
 
-          {/* ── Form Actions ── */}
+          {/* Form Actions */}
           <div className="flex items-center gap-3 pt-2">
             <button
               type="submit"
@@ -479,7 +471,7 @@ export default function CitiesPage() {
               ) : (
                 <Plus size={16} />
               )}
-              {submitting ? 'Saving...' : editingId ? 'Update City' : 'Create City'}
+              {submitting ? 'Saving...' : editingId ? 'Update FAQ' : 'Create FAQ'}
             </button>
             {editingId && (
               <button
@@ -504,7 +496,7 @@ export default function CitiesPage() {
         </form>
       </motion.div>
 
-      {/* ────────────── Cities Table ────────────── */}
+      {/* FAQs Table */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -519,13 +511,13 @@ export default function CitiesPage() {
         <div className="px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" style={{ borderBottom: '1px solid var(--border)' }}>
           <div className="flex items-center gap-3">
             <h2 className="text-lg font-semibold" style={{ color: 'var(--foreground)' }}>
-              All Cities
+              All FAQs
             </h2>
             <span
               className="text-xs px-2.5 py-1 rounded-full font-medium"
               style={{ background: 'var(--muted)', color: 'var(--muted-foreground)' }}
             >
-              {cities.length} total
+              {faqs.length} total
             </span>
           </div>
           {/* Search */}
@@ -539,7 +531,7 @@ export default function CitiesPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search cities or counties..."
+              placeholder="Search FAQs or categories..."
               className="pl-9 pr-3 py-2 rounded-lg text-sm w-full sm:w-64 transition-all duration-200"
               style={inputStyle}
               onFocus={(e) => {
@@ -567,44 +559,44 @@ export default function CitiesPage() {
           <div className="flex items-center justify-center py-16">
             <Loader2 size={28} className="animate-spin" style={{ color: 'var(--accent)' }} />
           </div>
-        ) : filteredCities.length === 0 ? (
+        ) : filteredFaqs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-3">
             <div
               className="w-14 h-14 rounded-full flex items-center justify-center"
               style={{ background: 'var(--muted)' }}
             >
-              <MapPin size={24} style={{ color: 'var(--muted-foreground)' }} />
+              <HelpCircle size={24} style={{ color: 'var(--muted-foreground)' }} />
             </div>
             <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
               {searchQuery
-                ? 'No cities match your search.'
-                : 'No cities yet. Create your first one above.'}
+                ? 'No FAQs match your search.'
+                : 'No FAQs yet. Create your first one above.'}
             </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            {Object.entries(groupedCities).map(([county, countyCities]) => (
-              <div key={county}>
-                {/* County Group Header */}
+            {Object.entries(groupedFaqs).map(([category, categoryFaqs]) => (
+              <div key={category}>
+                {/* Category Group Header */}
                 <div
                   className="px-4 py-2.5 flex items-center gap-2"
                   style={{ background: 'var(--muted)', borderBottom: '1px solid var(--border)' }}
                 >
-                  <MapPin size={14} style={{ color: 'var(--accent)' }} />
+                  <HelpCircle size={14} style={{ color: 'var(--accent)' }} />
                   <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--foreground)' }}>
-                    {county}
+                    {category}
                   </span>
                   <span
                     className="text-xs px-2 py-0.5 rounded-full font-medium"
                     style={{ background: 'var(--background)', color: 'var(--muted-foreground)' }}
                   >
-                    {countyCities.length}
+                    {categoryFaqs.length}
                   </span>
                 </div>
                 <table className="w-full">
                   <thead>
                     <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                      {['Name', 'County', 'Order', 'Status', 'Actions'].map((header) => (
+                      {['Question', 'Category', 'Order', 'Status', 'Actions'].map((header) => (
                         <th
                           key={header}
                           className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider"
@@ -617,9 +609,9 @@ export default function CitiesPage() {
                   </thead>
                   <tbody>
                     <AnimatePresence>
-                      {countyCities.map((city) => (
+                      {categoryFaqs.map((faq) => (
                         <motion.tr
-                          key={city._id}
+                          key={faq._id}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0, x: -20 }}
@@ -633,45 +625,48 @@ export default function CitiesPage() {
                             e.currentTarget.style.background = 'transparent';
                           }}
                         >
-                          <td className="px-4 py-3">
+                          <td className="px-4 py-3" style={{ maxWidth: '320px' }}>
                             <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                              {city.name}
+                              {faq.question}
                             </p>
-                            <p className="text-xs" style={{ color: 'var(--muted-foreground)' }}>
-                              /{city.slug}
+                            <p
+                              className="text-xs mt-0.5 line-clamp-2"
+                              style={{ color: 'var(--muted-foreground)' }}
+                            >
+                              {faq.answer}
                             </p>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-sm" style={{ color: 'var(--foreground)' }}>
-                              {city.county}
+                              {faq.category}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span className="text-sm" style={{ color: 'var(--foreground)' }}>
-                              {city.order}
+                              {faq.order}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <span
                               className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full"
                               style={{
-                                background: city.isActive ? '#16a34a18' : '#dc262618',
-                                color: city.isActive ? '#16a34a' : '#dc2626',
+                                background: faq.isActive ? '#16a34a18' : '#dc262618',
+                                color: faq.isActive ? '#16a34a' : '#dc2626',
                               }}
                             >
                               <span
                                 className="w-1.5 h-1.5 rounded-full"
                                 style={{
-                                  background: city.isActive ? '#16a34a' : '#dc2626',
+                                  background: faq.isActive ? '#16a34a' : '#dc2626',
                                 }}
                               />
-                              {city.isActive ? 'Active' : 'Inactive'}
+                              {faq.isActive ? 'Active' : 'Inactive'}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-1.5">
                               <button
-                                onClick={() => handleEdit(city)}
+                                onClick={() => handleEdit(faq)}
                                 className="p-2 rounded-lg cursor-pointer transition-colors duration-200"
                                 title="Edit"
                                 style={{ color: 'var(--muted-foreground)' }}
@@ -686,10 +681,10 @@ export default function CitiesPage() {
                               >
                                 <Pencil size={15} />
                               </button>
-                              {deleteConfirm === city._id ? (
+                              {deleteConfirm === faq._id ? (
                                 <div className="flex items-center gap-1">
                                   <button
-                                    onClick={() => handleDelete(city._id)}
+                                    onClick={() => handleDelete(faq._id)}
                                     className="px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors duration-200"
                                     style={{ background: '#dc2626', color: '#fff' }}
                                     onMouseEnter={(e) => {
@@ -714,7 +709,7 @@ export default function CitiesPage() {
                                 </div>
                               ) : (
                                 <button
-                                  onClick={() => setDeleteConfirm(city._id)}
+                                  onClick={() => setDeleteConfirm(faq._id)}
                                   className="p-2 rounded-lg cursor-pointer transition-colors duration-200"
                                   title="Delete"
                                   style={{ color: 'var(--muted-foreground)' }}
