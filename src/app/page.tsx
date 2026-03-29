@@ -195,12 +195,12 @@ const platformBadges = [
   {
     name: 'Hotfrog',
     image: 'https://ldndecks.com/wp-content/uploads/2025/12/images.png',
-    href: 'https://www.hotfrog.com/company/b2e3b89b4e7f4b2fce74e7c84c2b27a7/loudoun-decks-llc/centreville/deck-builders',
+    href: 'https://www.hotfrog.com/company/00143ad7693d39b5274903545f6f16b8/loudoun-deck/centreville/general-home-supplies-services',
   },
   {
     name: 'BBB Accredited Business',
     image: 'https://ldndecks.com/wp-content/uploads/2025/12/images-1.png',
-    href: 'https://www.bbb.org/us/va/centreville/profile/deck-builder/loudoun-decks-llc-0241-236027095',
+    href: 'https://www.bbb.org/us/va/centreville/profile/deck-builder/loudoun-decks-0241-236091241',
   },
 ];
 
