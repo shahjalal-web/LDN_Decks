@@ -375,7 +375,7 @@ export default function HomePage() {
                   Get Free Estimate
                   <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
                 </span>
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               </Link>
               <a
                 href="tel:+15716557207"

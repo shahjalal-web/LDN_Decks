@@ -247,9 +247,10 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
                   aria-label="Toggle theme"
-                  className="relative w-14 h-7 rounded-full flex items-center transition-all duration-300"
+                  className="relative w-14 h-7 rounded-full flex items-center transition-all duration-300 border"
                   style={{
-                    backgroundColor: theme === 'dark' ? 'var(--accent)' : 'var(--muted)',
+                    backgroundColor: theme === 'dark' ? 'var(--accent)' : 'var(--border)',
+                    borderColor: theme === 'dark' ? 'var(--accent)' : 'color-mix(in srgb, var(--foreground) 15%, transparent)',
                     padding: '3px',
                   }}
                 >
