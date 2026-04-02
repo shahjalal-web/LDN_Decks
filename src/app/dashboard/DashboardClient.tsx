@@ -81,7 +81,7 @@ export default function DashboardClient({ initialCounts }: { initialCounts: Init
 
   const statusColors: Record<string, { bg: string; text: string }> = {
     new: { bg: 'rgba(37,99,235,0.12)', text: '#2563eb' },
-    'in-progress': { bg: 'rgba(245,158,11,0.12)', text: '#d97706' },
+    'in-progress': { bg: 'rgba(5,150,105,0.12)', text: '#059669' },
     completed: { bg: 'rgba(22,163,74,0.12)', text: '#16a34a' },
     cancelled: { bg: 'rgba(220,38,38,0.12)', text: '#dc2626' },
   };

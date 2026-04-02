@@ -77,7 +77,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm transition-colors hover:text-amber-500"
+                    className="text-sm transition-colors hover:text-emerald-500"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
                     {link.label}
@@ -97,7 +97,7 @@ export function Footer() {
                 <li key={link.href}>
                   <Link
                     href={link.href}
-                    className="text-sm transition-colors hover:text-amber-500"
+                    className="text-sm transition-colors hover:text-emerald-500"
                     style={{ color: 'var(--muted-foreground)' }}
                   >
                     {link.label}
@@ -116,7 +116,7 @@ export function Footer() {
               <li>
                 <a
                   href="tel:+15716557207"
-                  className="flex items-start gap-3 text-sm transition-colors hover:text-amber-500"
+                  className="flex items-start gap-3 text-sm transition-colors hover:text-emerald-500"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   <Phone size={15} className="mt-0.5 shrink-0" />
@@ -126,7 +126,7 @@ export function Footer() {
               <li>
                 <a
                   href="mailto:office@ldndecks.com"
-                  className="flex items-start gap-3 text-sm transition-colors hover:text-amber-500"
+                  className="flex items-start gap-3 text-sm transition-colors hover:text-emerald-500"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   <Mail size={15} className="mt-0.5 shrink-0" />
@@ -159,10 +159,10 @@ export function Footer() {
         >
           <p>© {new Date().getFullYear()} Loudoun Decks LLC. All rights reserved.</p>
           <div className="flex gap-4">
-            <Link href="/terms-and-conditions/" className="hover:text-amber-500 transition-colors">
+            <Link href="/terms-and-conditions/" className="hover:text-emerald-500 transition-colors">
               Terms & Conditions
             </Link>
-            <Link href="/privacy-policy/" className="hover:text-amber-500 transition-colors">
+            <Link href="/privacy-policy/" className="hover:text-emerald-500 transition-colors">
               Privacy Policy
             </Link>
           </div>
@@ -172,7 +172,7 @@ export function Footer() {
               href="https://www.fiverr.com/shah_jalal_web"
               target="_blank"
               rel="noopener noreferrer"
-              className="font-semibold hover:text-amber-500 transition-colors"
+              className="font-semibold hover:text-emerald-500 transition-colors"
               style={{ color: 'var(--accent)' }}
             >
               Shah Jalal
@@ -182,7 +182,7 @@ export function Footer() {
               href="https://wa.me/8801832822560"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-amber-500 transition-colors"
+              className="hover:text-emerald-500 transition-colors"
             >
               WhatsApp
             </a>

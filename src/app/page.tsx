@@ -7,7 +7,7 @@ import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import {
   ArrowRight, Phone, Star, Shield, Leaf, BadgeCheck,
   Layers, Droplets, Flower2, Fence, DoorOpen, Home, Square, TreePine,
-  ChevronDown, Quote, CheckCircle2, Sparkles
+  ChevronDown, Quote, CheckCircle2, Sparkles, Award, ExternalLink
 } from 'lucide-react';
 
 /* ─── Animated Counter ─────────────────────────────────────────────────────── */
@@ -245,147 +245,184 @@ export default function HomePage() {
       {/* ═══ HERO ═══════════════════════════════════════════════════════════ */}
       <section
         ref={heroRef}
-        className="relative min-h-[90vh] flex items-center overflow-hidden"
-        style={{
-          background: 'linear-gradient(160deg, var(--background) 0%, color-mix(in srgb, var(--accent) 6%, var(--background)) 50%, var(--background) 100%)',
-        }}
+        className="relative min-h-[92vh] flex items-center overflow-hidden"
       >
-        {/* Decorative elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={{ opacity: 0.06, scale: 1 }}
-            transition={{ duration: 2, ease: 'easeOut' }}
-            className="absolute -top-32 -right-32 w-175 h-175 rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
+        {/* ── Background image ── */}
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1591825729269-caeb344f6df2?auto=format&fit=crop&w=2000&q=80"
+            alt="Beautiful outdoor deck space"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
           />
+          {/* Dark overlay with gradient */}
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.03 }}
-            transition={{ duration: 2.5, delay: 0.3 }}
-            className="absolute top-1/2 -left-32 w-125 h-125 rounded-full"
-            style={{ backgroundColor: 'var(--accent)' }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1.2 }}
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.45) 40%, rgba(0,0,0,0.65) 100%)',
+            }}
           />
-          {/* Grid pattern */}
+          {/* Accent gradient overlay at bottom */}
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage: 'radial-gradient(color-mix(in srgb, var(--foreground) 4%, transparent) 1px, transparent 1px)',
-              backgroundSize: '40px 40px',
+              background: 'linear-gradient(0deg, color-mix(in srgb, var(--gradient-start) 15%, transparent) 0%, transparent 40%)',
+            }}
+          />
+          {/* Subtle noise/grain texture */}
+          <div
+            className="absolute inset-0 opacity-[0.03]"
+            style={{
+              backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'n\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23n)\'/%3E%3C/svg%3E")',
             }}
           />
         </div>
 
-        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-20 relative z-10 w-full">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <motion.div style={{ y: heroY, opacity: heroOpacity }} className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 py-16 sm:py-20 relative z-10 w-full">
+          {/* ── Main content: centered layout ── */}
+          <div className="text-center max-w-4xl mx-auto">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              transition={{ duration: 0.6 }}
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full text-xs font-bold mb-8 border backdrop-blur-md"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                color: '#ffffff',
+                borderColor: 'rgba(255,255,255,0.2)',
+              }}
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping" style={{ backgroundColor: 'var(--gradient-start)' }} />
+                <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: 'var(--gradient-start)' }} />
+              </span>
+              Licensed & BBB Accredited Contractor
+            </motion.div>
 
-            {/* Left – Text */}
-            <div>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold mb-8 border"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--accent) 8%, transparent)',
-                  color: 'var(--accent)',
-                  borderColor: 'color-mix(in srgb, var(--accent) 25%, transparent)',
-                }}
-              >
-                <Star size={12} fill="currentColor" />
-                Licensed & BBB Accredited Contractor
-              </motion.div>
-
+            {/* Heading — staggered word reveal */}
+            <div className="mb-8">
               <motion.h1
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.1 }}
-                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold leading-[1.08] mb-7"
-                style={{ color: 'var(--foreground)' }}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-extrabold leading-[1.05] tracking-tight text-white"
               >
-                Your Vision,{' '}
-                <span
+                {['Your', 'Vision,'].map((word, i) => (
+                  <motion.span
+                    key={word}
+                    initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    transition={{ duration: 0.6, delay: 0.15 + i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+                    className="inline-block mr-[0.25em]"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
+                <br className="hidden sm:block" />
+                <motion.span
+                  initial={{ opacity: 0, y: 40, filter: 'blur(8px)' }}
+                  animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                  transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   className="relative inline-block"
-                  style={{ color: 'var(--accent)' }}
                 >
-                  Our Expertise
+                  <span
+                    className="bg-clip-text text-transparent"
+                    style={{ backgroundImage: 'linear-gradient(135deg, #34d399, #2dd4bf)' }}
+                  >
+                    Our Expertise
+                  </span>
                   <motion.span
                     initial={{ scaleX: 0 }}
                     animate={{ scaleX: 1 }}
-                    transition={{ duration: 0.6, delay: 0.8 }}
-                    className="absolute -bottom-1 left-0 right-0 h-1 rounded-full origin-left"
-                    style={{ backgroundColor: 'var(--accent)', opacity: 0.3 }}
+                    transition={{ duration: 0.8, delay: 1.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute -bottom-1 sm:-bottom-2 left-0 right-0 h-1 sm:h-1.5 rounded-full origin-left"
+                    style={{ background: 'linear-gradient(90deg, #34d399, #2dd4bf)', opacity: 0.5 }}
                   />
-                </span>
-                ,{' '}Perfect Outdoor Spaces
+                </motion.span>
               </motion.h1>
-
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.25 }}
-                className="text-base sm:text-lg lg:text-xl mb-10 leading-relaxed max-w-xl"
-                style={{ color: 'var(--muted-foreground)' }}
-              >
-                Northern Virginia&apos;s trusted outdoor living contractor. Custom decks, porches, patios, and more — built to last with sustainable materials.
-              </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.35 }}
-                className="flex flex-col sm:flex-row gap-4"
-              >
-                <Link
-                  href="/contacts/"
-                  className="group inline-flex items-center justify-center gap-2.5 px-10 py-5 rounded-2xl text-base font-bold transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl active:scale-[0.98]"
-                  style={{
-                    backgroundColor: 'var(--accent)',
-                    color: 'var(--accent-foreground)',
-                    boxShadow: '0 8px 30px color-mix(in srgb, var(--accent) 35%, transparent)',
-                  }}
-                >
-                  Get Free Estimate
-                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
-                </Link>
-                <a
-                  href="tel:+15716557207"
-                  className="inline-flex items-center justify-center gap-2.5 px-10 py-5 rounded-2xl text-base font-bold border-2 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98]"
-                  style={{
-                    borderColor: 'var(--border)',
-                    color: 'var(--foreground)',
-                    backgroundColor: 'color-mix(in srgb, var(--card) 80%, transparent)',
-                  }}
-                >
-                  <Phone size={18} />
-                  (571) 655-7207
-                </a>
-              </motion.div>
             </div>
 
-            {/* Right – Stats grid */}
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="text-base sm:text-lg lg:text-xl mb-12 leading-relaxed max-w-2xl mx-auto text-white/80"
+            >
+              Northern Virginia&apos;s trusted outdoor living contractor. Custom decks, porches, patios & more — built to last with sustainable, premium materials.
+            </motion.p>
+
+            {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="hidden lg:grid grid-cols-2 gap-5"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center mb-16 sm:mb-20"
+            >
+              <Link
+                href="/contacts/"
+                className="group relative inline-flex items-center justify-center gap-2.5 px-10 py-5 rounded-2xl text-base font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
+                  color: '#ffffff',
+                  boxShadow: '0 8px 32px rgba(5,150,105,0.4)',
+                }}
+              >
+                <span className="relative z-10 flex items-center gap-2.5">
+                  Get Free Estimate
+                  <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
+                </span>
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+              </Link>
+              <a
+                href="tel:+15716557207"
+                className="group inline-flex items-center justify-center gap-2.5 px-10 py-5 rounded-2xl text-base font-bold border-2 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] backdrop-blur-md"
+                style={{
+                  borderColor: 'rgba(255,255,255,0.3)',
+                  color: '#ffffff',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                }}
+              >
+                <Phone size={18} className="transition-transform group-hover:rotate-12" />
+                (571) 655-7207
+              </a>
+            </motion.div>
+
+            {/* Stats row */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.8 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4"
             >
               {stats.map(({ label, value, suffix }, i) => (
                 <motion.div
                   key={label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.5 + i * 0.1 }}
-                  className="p-8 rounded-3xl border backdrop-blur-sm"
+                  transition={{ duration: 0.5, delay: 0.9 + i * 0.1 }}
+                  whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                  className="relative p-5 sm:p-7 rounded-2xl border backdrop-blur-md cursor-default overflow-hidden"
                   style={{
-                    backgroundColor: 'color-mix(in srgb, var(--card) 70%, transparent)',
-                    borderColor: 'var(--border)',
+                    backgroundColor: 'rgba(255,255,255,0.07)',
+                    borderColor: 'rgba(255,255,255,0.12)',
                   }}
                 >
-                  <div className="text-4xl font-extrabold mb-2" style={{ color: 'var(--accent)' }}>
-                    <Counter to={value} suffix={suffix} />
+                  <div
+                    className="absolute -top-4 -right-4 w-16 h-16 rounded-full blur-xl"
+                    style={{ background: 'rgba(52,211,153,0.12)' }}
+                  />
+                  <div className="relative">
+                    <div className="text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-1" style={{ color: '#34d399' }}>
+                      <Counter to={value} suffix={suffix} />
+                    </div>
+                    <p className="text-xs sm:text-sm font-medium text-white/60">
+                      {label}
+                    </p>
                   </div>
-                  <p className="text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>{label}</p>
                 </motion.div>
               ))}
             </motion.div>
@@ -396,20 +433,29 @@ export default function HomePage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
-          style={{ color: 'var(--muted-foreground)' }}
+          transition={{ delay: 2 }}
+          className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 text-white/50"
         >
-          <span className="text-xs font-medium tracking-wide">Scroll</span>
-          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}>
-            <ChevronDown size={18} />
+          <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">Scroll</span>
+          <motion.div
+            animate={{ y: [0, 6, 0] }}
+            transition={{ repeat: Infinity, duration: 1.6, ease: 'easeInOut' }}
+          >
+            <ChevronDown size={16} />
           </motion.div>
         </motion.div>
       </section>
 
       {/* ═══ TRUST BAR ═════════════════════════════════════════════════════ */}
-      <section style={{ backgroundColor: 'var(--accent)' }} className="py-5 md:py-6">
-        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+      <section
+        className="py-5 md:py-6 relative overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))' }}
+      >
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }} />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full" style={{ backgroundColor: 'rgba(255,255,255,0.04)' }} />
+        </div>
+        <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 relative z-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
             {badges.map(({ icon: Icon, text }, i) => (
               <motion.div
@@ -423,27 +469,6 @@ export default function HomePage() {
                 <Icon size={18} strokeWidth={2.5} />
                 <span>{text}</span>
               </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ═══ MOBILE STATS (shown only on mobile since desktop has them in hero) ═══ */}
-      <section className="py-16 lg:hidden" style={{ backgroundColor: 'var(--muted)' }}>
-        <div className="max-w-7xl mx-auto px-5 sm:px-8">
-          <div className="grid grid-cols-2 gap-5">
-            {stats.map(({ label, value, suffix }, i) => (
-              <FadeIn key={label} delay={i * 0.1}>
-                <div
-                  className="p-7 sm:p-8 rounded-2xl border text-center"
-                  style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}
-                >
-                  <div className="text-3xl sm:text-4xl font-extrabold mb-1" style={{ color: 'var(--accent)' }}>
-                    <Counter to={value} suffix={suffix} />
-                  </div>
-                  <p className="text-xs sm:text-sm font-medium" style={{ color: 'var(--muted-foreground)' }}>{label}</p>
-                </div>
-              </FadeIn>
             ))}
           </div>
         </div>
@@ -600,25 +625,27 @@ export default function HomePage() {
         <div className="grid md:grid-cols-4 gap-8 md:gap-6 relative">
           {/* Connecting line (desktop only) */}
           <div
-            className="hidden md:block absolute top-12 left-[12%] right-[12%] h-0.5"
+            className="hidden md:block absolute top-14 left-[12%] right-[12%] h-0.5"
             style={{
-              background: 'linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 30%, transparent))',
+              background: 'linear-gradient(90deg, var(--gradient-start), var(--gradient-end), color-mix(in srgb, var(--accent) 20%, transparent))',
             }}
           />
 
           {processSteps.map((item, i) => (
             <FadeIn key={item.step} delay={i * 0.12}>
               <div className="text-center relative flex flex-col items-center">
-                <div
-                  className="w-22 h-22 md:w-28 md:h-28 rounded-3xl flex items-center justify-center mb-7 relative z-10 transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                <motion.div
+                  whileHover={{ scale: 1.1, rotate: 3 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+                  className="w-22 h-22 md:w-28 md:h-28 rounded-3xl flex items-center justify-center mb-7 relative z-10"
                   style={{
-                    backgroundColor: 'var(--accent)',
+                    background: 'linear-gradient(135deg, var(--gradient-start), var(--gradient-end))',
                     color: 'var(--accent-foreground)',
-                    boxShadow: '0 8px 25px color-mix(in srgb, var(--accent) 30%, transparent)',
+                    boxShadow: '0 8px 30px color-mix(in srgb, var(--accent) 25%, transparent)',
                   }}
                 >
                   <span className="text-2xl md:text-3xl font-extrabold">{item.step}</span>
-                </div>
+                </motion.div>
                 <h3 className="font-bold text-lg mb-3" style={{ color: 'var(--foreground)' }}>{item.title}</h3>
                 <p className="text-sm leading-relaxed max-w-65" style={{ color: 'var(--muted-foreground)' }}>{item.desc}</p>
               </div>
@@ -697,36 +724,86 @@ export default function HomePage() {
       </Section>
 
       {/* ═══ PARTNERS ══════════════════════════════════════════════════════ */}
-      <section className="py-14 md:py-16 border-t" style={{ backgroundColor: 'var(--background)', borderColor: 'var(--border)' }}>
+      <section className="py-20 md:py-24 relative overflow-hidden" style={{ backgroundColor: 'var(--background)' }}>
+        {/* Subtle background decoration */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div
+            className="absolute top-0 left-0 right-0 h-px"
+            style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)', opacity: 0.3 }}
+          />
+          <div
+            className="absolute bottom-0 left-0 right-0 h-px"
+            style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)', opacity: 0.3 }}
+          />
+        </div>
+
         <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
           <FadeIn>
-            <p
-              className="text-center text-xs font-bold uppercase tracking-[0.2em] mb-3"
-              style={{ color: 'var(--muted-foreground)' }}
-            >
-              Trusted Partners & Premium Materials
-            </p>
+            <div className="text-center mb-12 md:mb-14">
+              <span
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-4"
+                style={{
+                  backgroundColor: 'color-mix(in srgb, var(--accent) 10%, transparent)',
+                  color: 'var(--accent)',
+                }}
+              >
+                <Award size={12} />
+                Recognized Excellence
+              </span>
+              <h3
+                className="text-2xl sm:text-3xl font-extrabold"
+                style={{ color: 'var(--foreground)' }}
+              >
+                Trusted Partners & Accreditations
+              </h3>
+            </div>
           </FadeIn>
-          
 
-          <div className="flex flex-wrap justify-center gap-8 md:gap-14 items-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {platformBadges.map((badge, i) => (
               <FadeIn key={badge.name} delay={i * 0.1}>
-                <a
+                <motion.a
                   href={badge.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block transition-all duration-300 hover:scale-110 hover:opacity-100 opacity-80"
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                  className="group relative flex flex-col items-center justify-center gap-4 p-6 md:p-8 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:shadow-xl"
+                  style={{
+                    backgroundColor: 'color-mix(in srgb, var(--card) 80%, transparent)',
+                    borderColor: 'var(--border)',
+                  }}
                   title={badge.name}
                 >
-                  <Image
-                    src={badge.image}
-                    alt={badge.name}
-                    width={120}
-                    height={60}
-                    className="object-contain h-12 md:h-16 w-auto"
+                  <div className="relative">
+                    <Image
+                      src={badge.image}
+                      alt={badge.name}
+                      width={120}
+                      height={60}
+                      className="object-contain h-14 md:h-16 w-auto transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className="text-xs font-semibold transition-colors duration-300"
+                      style={{ color: 'var(--muted-foreground)' }}
+                    >
+                      {badge.name}
+                    </span>
+                    <ExternalLink
+                      size={10}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                      style={{ color: 'var(--accent)' }}
+                    />
+                  </div>
+                  {/* Hover glow effect */}
+                  <div
+                    className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+                    style={{
+                      background: 'radial-gradient(circle at center, color-mix(in srgb, var(--accent) 5%, transparent), transparent 70%)',
+                    }}
                   />
-                </a>
+                </motion.a>
               </FadeIn>
             ))}
           </div>
@@ -737,18 +814,30 @@ export default function HomePage() {
       <section
         className="py-24 md:py-32 relative overflow-hidden"
         style={{
-          background: 'linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 65%, #000) 100%)',
+          background: 'linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 50%, color-mix(in srgb, var(--accent) 65%, #0a2e1f) 100%)',
         }}
       >
-        {/* Decorative circles */}
+        {/* Decorative elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div
+          <motion.div
+            animate={{ scale: [1, 1.1, 1], opacity: [0.05, 0.08, 0.05] }}
+            transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
             className="absolute -top-20 -right-20 w-100 h-100 rounded-full"
             style={{ backgroundColor: 'rgba(255,255,255,0.05)' }}
           />
-          <div
+          <motion.div
+            animate={{ scale: [1, 1.15, 1], opacity: [0.03, 0.06, 0.03] }}
+            transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
             className="absolute -bottom-10 -left-10 w-75 h-75 rounded-full"
             style={{ backgroundColor: 'rgba(255,255,255,0.03)' }}
+          />
+          {/* Grid overlay */}
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px)',
+              backgroundSize: '28px 28px',
+            }}
           />
         </div>
 
@@ -765,7 +854,7 @@ export default function HomePage() {
               <Link
                 href="/contacts/"
                 className="group inline-flex items-center justify-center gap-2.5 px-10 py-5 rounded-2xl text-base font-bold bg-white transition-all duration-300 hover:scale-[1.03] hover:shadow-2xl active:scale-[0.98]"
-                style={{ color: 'var(--accent)' }}
+                style={{ color: 'var(--gradient-start)' }}
               >
                 Get Free Estimate
                 <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />

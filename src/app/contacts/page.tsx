@@ -130,7 +130,7 @@ export default function ContactPage() {
                     <div>
                       <p className="text-xs font-bold uppercase tracking-wider mb-1" style={{ color: 'var(--muted-foreground)' }}>{label}</p>
                       {href ? (
-                        <a href={href} className="text-sm font-medium hover:text-amber-500 transition-colors" style={{ color: 'var(--foreground)' }}>{value}</a>
+                        <a href={href} className="text-sm font-medium hover:text-emerald-500 transition-colors" style={{ color: 'var(--foreground)' }}>{value}</a>
                       ) : (
                         <p className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{value}</p>
                       )}

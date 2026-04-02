@@ -30,7 +30,7 @@ interface Showcase {
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'New Deck': '#d97706',
+  'New Deck': '#059669',
   'Resurfacing': '#059669',
   'Fence': '#7c3aed',
   'Porch': '#0891b2',

@@ -27,7 +27,7 @@ interface ShowcaseGridProps {
 const CATEGORIES = ['All', 'New Deck', 'Resurfacing', 'Fence', 'Porch', 'Patio', 'Pergola'];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  'New Deck': '#d97706',
+  'New Deck': '#059669',
   'Resurfacing': '#059669',
   'Fence': '#7c3aed',
   'Porch': '#0891b2',

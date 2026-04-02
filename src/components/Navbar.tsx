@@ -115,7 +115,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
           <span>Mon–Fri 8AM–6PM &nbsp;|&nbsp; Sat 9AM–2PM</span>
           <a
             href="tel:+15716557207"
-            className="flex items-center gap-1.5 font-semibold transition-colors hover:text-amber-500"
+            className="flex items-center gap-1.5 font-semibold transition-colors hover:text-emerald-500"
             style={{ color: 'var(--foreground)' }}
           >
             <Phone size={12} />
@@ -141,15 +141,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                 className="h-9 w-auto"
                 priority
               />
-              <span
-                className="ml-2 hidden sm:inline text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded"
-                style={{
-                  backgroundColor: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-                  color: 'var(--accent)',
-                }}
-              >
-                LLC
-              </span>
+              
             </Link>
 
             {/* Desktop nav */}
@@ -223,7 +215,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                   key={link.href}
                   href={link.href}
                   onClick={() => setActiveMenu(null)}
-                  className="px-3.5 py-2 ml-5 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                  className="px-3.5 py-2 ml-5 rounded-lg text-[13px] font-semibold transition-colors hover:text-emerald-500"
                   style={{ color: 'var(--foreground)' }}
                 >
                   {link.label}
@@ -237,7 +229,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                   <Link
                     href="/dashboard"
                     onClick={() => setActiveMenu(null)}
-                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-emerald-500"
                     style={{ color: 'var(--accent)' }}
                   >
                     <LayoutDashboard size={14} />
@@ -282,7 +274,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
               {user ? (
                 <button
                   onClick={() => { logout(); setActiveMenu(null); }}
-                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-emerald-500"
                   style={{ color: 'var(--muted-foreground)' }}
                 >
                   <LogOut size={14} />
@@ -292,7 +284,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                 <Link
                   href="/login"
                   onClick={() => setActiveMenu(null)}
-                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-amber-500"
+                  className="hidden lg:inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-[13px] font-semibold transition-colors hover:text-emerald-500"
                   style={{ color: 'var(--foreground)' }}
                 >
                   <User size={14} />
@@ -446,7 +438,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                   <Link
                     href="/services/"
                     onClick={() => setActiveMenu(null)}
-                    className="flex items-center gap-1.5 text-xs font-bold transition-colors hover:text-amber-500"
+                    className="flex items-center gap-1.5 text-xs font-bold transition-colors hover:text-emerald-500"
                     style={{ color: 'var(--accent)' }}
                   >
                     View all services <ArrowRight size={12} />
@@ -489,7 +481,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                             key={city.slug}
                             href={`/top-decks-build-near-you/${city.slug}/`}
                             onClick={() => setActiveMenu(null)}
-                            className="text-[12px] font-medium transition-colors hover:text-amber-500"
+                            className="text-[12px] font-medium transition-colors hover:text-emerald-500"
                             style={{ color: 'var(--muted-foreground)' }}
                           >
                             {city.name}
@@ -507,7 +499,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                   <Link
                     href="/top-decks-build-near-you/"
                     onClick={() => setActiveMenu(null)}
-                    className="flex items-center gap-1.5 text-xs font-bold transition-colors hover:text-amber-500"
+                    className="flex items-center gap-1.5 text-xs font-bold transition-colors hover:text-emerald-500"
                     style={{ color: 'var(--accent)' }}
                   >
                     View all locations <ArrowRight size={12} />
@@ -671,7 +663,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                         key={link.href}
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className="block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:text-amber-500"
+                        className="block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:text-emerald-500"
                         style={{ color: 'var(--foreground)' }}
                       >
                         {link.label}
@@ -697,7 +689,7 @@ export function Navbar({ services = [], counties = [] }: NavbarProps) {
                         key={link.href}
                         href={link.href}
                         onClick={() => setMobileOpen(false)}
-                        className="block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:text-amber-500"
+                        className="block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors hover:text-emerald-500"
                         style={{ color: 'var(--foreground)' }}
                       >
                         {link.label}

@@ -46,7 +46,7 @@ const STATUS_OPTIONS: { value: ContactStatus; label: string }[] = [
 
 const STATUS_COLORS: Record<ContactStatus, { bg: string; color: string; dot: string }> = {
   new: { bg: '#3b82f618', color: '#3b82f6', dot: '#3b82f6' },
-  'in-progress': { bg: '#f59e0b18', color: '#f59e0b', dot: '#f59e0b' },
+  'in-progress': { bg: '#05966918', color: '#059669', dot: '#059669' },
   completed: { bg: '#16a34a18', color: '#16a34a', dot: '#16a34a' },
   cancelled: { bg: '#dc262618', color: '#dc2626', dot: '#dc2626' },
 };

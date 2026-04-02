@@ -87,7 +87,7 @@ export default async function NearYouPage() {
                       <Link
                         key={city._id}
                         href={`/top-decks-build-near-you/${city.slug}/`}
-                        className="flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all hover:scale-105 hover:border-amber-500"
+                        className="flex items-center justify-between px-4 py-3 rounded-xl border text-sm font-medium transition-all hover:scale-105 hover:border-emerald-500"
                         style={{
                           backgroundColor: 'var(--card)',
                           borderColor: 'var(--border)',
